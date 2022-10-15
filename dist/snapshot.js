@@ -309,7 +309,10 @@ var Snapshot = /** @class */ (function () {
                         scripts = Array.from(document.querySelectorAll('script'));
                         for (i = 0; i < scripts.length; i++) {
                             script = scripts[i];
-                            if (script.src.includes('c.disquscdn.com') ||
+                            if (
+                            // remove auto cdn disqus
+                            script.src.includes('c.disquscdn.com') ||
+                                // remove auto cdn google analytics
                                 script.src.includes('l=dataLayer'))
                                 script.remove();
                         }

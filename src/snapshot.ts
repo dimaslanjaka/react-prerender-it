@@ -218,8 +218,9 @@ export class Snapshot {
     for (let i = 0; i < scripts.length; i++) {
       const script = scripts[i];
       if (
+        // remove auto cdn disqus
         script.src.includes('c.disquscdn.com') ||
-        // fix auto cdn google analytics
+        // remove auto cdn google analytics
         script.src.includes('l=dataLayer')
       )
         script.remove();
