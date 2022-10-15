@@ -137,7 +137,7 @@ var Snapshot = /** @class */ (function () {
                             "iframe[src*='googleads.g.doubleclick.net']",
                             "iframe[src='https://www.google.com/recaptcha/api2/aframe']",
                             '.adsbygoogle-noablate',
-                            'script[src="https://www.googletagmanager.com/gtag/js"]',
+                            'script[src="&amp;l=dataLayer&amp;"]',
                             'iframe[src*="tpc.googlesyndication.com"]'
                             //'script[src*="main."]',
                         ];

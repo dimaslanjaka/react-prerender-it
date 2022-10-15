@@ -63,7 +63,8 @@ function ServerSnapshot(options) {
         dest: (0, upath_1.join)(process.cwd(), 'tmp'),
         registerStatic: [],
         routes: [],
-        autoRoutes: false
+        autoRoutes: false,
+        callback: null
     };
     // assign options with the default options
     options = Object.assign(defaults, options);
@@ -143,7 +144,7 @@ function ServerSnapshot(options) {
             return [2 /*return*/, res.sendFile(index200)];
         });
     }); });
-    return new bluebird_1["default"](function (resolveServer) { return __awaiter(_this, void 0, void 0, function () {
+    new bluebird_1["default"](function (resolveServer) { return __awaiter(_this, void 0, void 0, function () {
         var AppServer, baseUrl, crawlRoutes, i, route, url;
         return __generator(this, function (_a) {
             switch (_a.label) {
@@ -187,16 +188,25 @@ function ServerSnapshot(options) {
                     i++;
                     return [3 /*break*/, 2];
                 case 5:
-                    if (AppServer.closeAllConnections) {
+                    /*if (AppServer.closeAllConnections) {
+                      AppServer.closeAllConnections();
+                    } else {
+                      AppServer.close();
+                    }*/
+                    try {
                         AppServer.closeAllConnections();
-                    }
-                    else {
                         AppServer.close();
+                    }
+                    catch (_b) {
+                        //
                     }
                     resolveServer({ server: AppServer, snap: snap });
                     return [2 /*return*/];
             }
         });
-    }); });
+    }); }).then(function (resolved) {
+        if (typeof options.callback === 'function')
+            options.callback(resolved);
+    });
 }
 exports.ServerSnapshot = ServerSnapshot;

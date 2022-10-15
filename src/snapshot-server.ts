@@ -37,6 +37,10 @@ export interface ServerSnapshotOptions {
    * Auto detect internal links and crawl them
    */
   autoRoutes?: boolean;
+  callback?: (resolved: {
+    server: ReturnType<ReturnType<typeof express>['listen']>;
+    snap: Snapshot;
+  }) => any;
 }
 
 export function ServerSnapshot(options: ServerSnapshotOptions) {
@@ -45,7 +49,8 @@ export function ServerSnapshot(options: ServerSnapshotOptions) {
     dest: join(process.cwd(), 'tmp'),
     registerStatic: [],
     routes: [],
-    autoRoutes: false
+    autoRoutes: false,
+    callback: null
   };
   // assign options with the default options
   options = Object.assign(defaults, options);
@@ -129,52 +134,53 @@ export function ServerSnapshot(options: ServerSnapshotOptions) {
     return res.sendFile(index200);
   });
 
-  return new Bluebird(
-    async (
-      resolveServer: (resolved: {
-        server: ReturnType<typeof app.listen>;
-        snap: Snapshot;
-      }) => any
-    ) => {
-      const AppServer = app.listen(4000, () => {
-        _debugExpress('listening http://localhost:4000');
-      });
+  new Bluebird(async (resolveServer: ServerSnapshotOptions['callback']) => {
+    const AppServer = app.listen(4000, () => {
+      _debugExpress('listening http://localhost:4000');
+    });
 
-      const baseUrl = fixUrl('http://localhost:4000/' + pathname);
-      await navigateScrape(baseUrl);
-      let crawlRoutes = routes || [];
-      if (options.autoRoutes) {
-        // auto crawl internal links merge
-        crawlRoutes = array_unique(
-          crawlRoutes
-            .concat(Array.from(snap.links.values()))
-            // trim all links
-            .map((path) => path.trim())
-            // filter undefined and null
-            .filter(
-              (path) =>
-                typeof path == 'string' &&
-                path.length > 0 &&
-                path !== 'undefined' &&
-                path !== 'null'
-            )
-        );
-      }
-      for (let i = 0; i < crawlRoutes.length; i++) {
-        const route = crawlRoutes[i];
-        if (typeof route !== 'string') continue;
-        const url = fixUrl('http://localhost:4000/' + route);
-        _debugsnap(url);
-        await navigateScrape(url);
-      }
-
-      if (AppServer.closeAllConnections) {
-        AppServer.closeAllConnections();
-      } else {
-        AppServer.close();
-      }
-
-      resolveServer({ server: AppServer, snap });
+    const baseUrl = fixUrl('http://localhost:4000/' + pathname);
+    await navigateScrape(baseUrl);
+    let crawlRoutes = routes || [];
+    if (options.autoRoutes) {
+      // auto crawl internal links merge
+      crawlRoutes = array_unique(
+        crawlRoutes
+          .concat(Array.from(snap.links.values()))
+          // trim all links
+          .map((path) => path.trim())
+          // filter undefined and null
+          .filter(
+            (path) =>
+              typeof path == 'string' &&
+              path.length > 0 &&
+              path !== 'undefined' &&
+              path !== 'null'
+          )
+      );
     }
-  );
+    for (let i = 0; i < crawlRoutes.length; i++) {
+      const route = crawlRoutes[i];
+      if (typeof route !== 'string') continue;
+      const url = fixUrl('http://localhost:4000/' + route);
+      _debugsnap(url);
+      await navigateScrape(url);
+    }
+
+    /*if (AppServer.closeAllConnections) {
+      AppServer.closeAllConnections();
+    } else {
+      AppServer.close();
+    }*/
+    try {
+      AppServer.closeAllConnections();
+      AppServer.close();
+    } catch {
+      //
+    }
+
+    resolveServer({ server: AppServer, snap });
+  }).then((resolved) => {
+    if (typeof options.callback === 'function') options.callback(resolved);
+  });
 }

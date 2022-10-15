@@ -1,6 +1,5 @@
-/// <reference types="node" />
-import Bluebird from 'bluebird';
 import 'core-js/actual/structured-clone';
+import express from 'express';
 import { Snapshot } from './snapshot';
 export interface ServerSnapshotOptions {
     /** React Generated Dir */
@@ -21,8 +20,9 @@ export interface ServerSnapshotOptions {
      * Auto detect internal links and crawl them
      */
     autoRoutes?: boolean;
+    callback?: (resolved: {
+        server: ReturnType<ReturnType<typeof express>['listen']>;
+        snap: Snapshot;
+    }) => any;
 }
-export declare function ServerSnapshot(options: ServerSnapshotOptions): Bluebird<{
-    server: import("http").Server<typeof import("http").IncomingMessage, typeof import("http").ServerResponse>;
-    snap: Snapshot;
-}>;
+export declare function ServerSnapshot(options: ServerSnapshotOptions): void;
