@@ -1,0 +1,4 @@
+[submodule "test"]
+	path = test
+	url = https://github.com/dimaslanjaka/react-gh-pages.git
+	branch = master
