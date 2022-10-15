@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "allowJs": true,
+    "checkJs": false,
+    "skipDefaultLibCheck": true,
+    "skipLibCheck": true
+  },
+  "typeAcquisition": {
+    "enable": true
+  }
+}

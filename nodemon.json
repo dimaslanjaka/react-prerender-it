@@ -1,0 +1,21 @@
+{
+  "$schema": "http://json.schemastore.org/nodemon",
+  "exec": "run-s build test",
+  "watch": [
+    "./src/*.ts"
+  ],
+  "ignore": [
+    "*.test.js",
+    ".vscode",
+    ".gitignore",
+    "gh-pages",
+    "dist",
+    "tests",
+    "tmp",
+    "temp",
+    "./src/tmp"
+  ],
+  "delay": 3000,
+  "ext": "ts,js",
+  "verbose": true
+}
