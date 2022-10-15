@@ -62,15 +62,25 @@ export class Snapshot {
     const document = dom.window.document;
     // remove unused elements
     const selectors = [
+      // auto generated adsense
       "script[src*='adsid/integrator.js']",
+      // auto generated adsense
       "script[src*='partner.googleadservices.com']",
+      // auto generated adsense
       "script[src*='show_ads_impl.js']",
+      // auto generated adsense
       "link[href*='adsid/integrator.js']",
+      // auto generated google analytics
+      'script[src*="&amp;l=dataLayer&amp;"]',
+      // auto generated react
       "meta[http-equiv='origin-trial']",
+      // auto generated adsense
       "iframe[src*='googleads.g.doubleclick.net']",
+      // auto generated adsense
       "iframe[src='https://www.google.com/recaptcha/api2/aframe']",
+      // auto generated adsense
       '.adsbygoogle-noablate',
-      'script[src="&amp;l=dataLayer&amp;"]',
+      // auto generated adsense
       'iframe[src*="tpc.googlesyndication.com"]'
       //'script[src*="main."]',
     ];
