@@ -209,9 +209,9 @@ var Snapshot = /** @class */ (function () {
                             el.removeAttribute('data-adsbygoogle-status');
                         });
                         // remove inner disqus comment
-                        if (document.getElementById('disqus_thread')) {
-                            document.getElementById('disqus_thread').innerHTML = '';
-                        }
+                        Array.from(document.querySelectorAll('#disqus_thread,#disqus_recommendations')).forEach(function (el) {
+                            el.innerHTML = '';
+                        });
                         return [4 /*yield*/, this.serializeHtml(dom)["finally"](function () {
                                 window.close();
                             })];

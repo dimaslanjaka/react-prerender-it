@@ -128,9 +128,11 @@ export class Snapshot {
       el.removeAttribute('data-adsbygoogle-status');
     });
     // remove inner disqus comment
-    if (document.getElementById('disqus_thread')) {
-      document.getElementById('disqus_thread').innerHTML = '';
-    }
+    Array.from(
+      document.querySelectorAll('#disqus_thread,#disqus_recommendations')
+    ).forEach((el) => {
+      el.innerHTML = '';
+    });
     const result = await this.serializeHtml(dom).finally(() => {
       window.close();
     });
