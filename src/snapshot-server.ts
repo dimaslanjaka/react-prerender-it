@@ -133,7 +133,7 @@ export function ServerSnapshot(options: ServerSnapshotOptions) {
       _debugExpress('listening http://localhost:4000');
     });
     resolveServer(server);
-  }).then(async (_server) => {
+  }).then(async (server) => {
     const baseUrl = fixUrl('http://localhost:4000/' + pathname);
     await navigateScrape(baseUrl);
     let crawlRoutes = routes || [];
@@ -162,10 +162,10 @@ export function ServerSnapshot(options: ServerSnapshotOptions) {
       await navigateScrape(url);
     }
 
-    if (_server.closeAllConnections) {
-      _server.closeAllConnections();
+    if (server.closeAllConnections) {
+      server.closeAllConnections();
     } else {
-      _server.close();
+      server.close();
     }
   });
 }

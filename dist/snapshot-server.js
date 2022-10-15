@@ -146,7 +146,7 @@ function ServerSnapshot(options) {
             _debugExpress('listening http://localhost:4000');
         });
         resolveServer(server);
-    }).then(function (_server) { return __awaiter(_this, void 0, void 0, function () {
+    }).then(function (server) { return __awaiter(_this, void 0, void 0, function () {
         var baseUrl, crawlRoutes, i, route, url;
         return __generator(this, function (_a) {
             switch (_a.label) {
@@ -187,11 +187,11 @@ function ServerSnapshot(options) {
                     i++;
                     return [3 /*break*/, 2];
                 case 5:
-                    if (_server.closeAllConnections) {
-                        _server.closeAllConnections();
+                    if (server.closeAllConnections) {
+                        server.closeAllConnections();
                     }
                     else {
-                        _server.close();
+                        server.close();
                     }
                     return [2 /*return*/];
             }
