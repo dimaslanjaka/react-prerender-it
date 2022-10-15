@@ -26,32 +26,68 @@ export const pkgJson = pkg;
 export class Snapshot {
   links = new Set<string>();
   scraping = false;
+  /**
+   * scrape url schedule list
+   */
+  schedule = new Set<string>();
+  /**
+   * scraped url list
+   */
+  scraped = new Set<string>();
 
+  /**
+   * scrape url
+   * @param url
+   * @returns
+   */
   async scrape(url: string) {
-    if (this.scraping) return null;
+    // skip url that already scraped
+    if (this.scraped.has(url)) {
+      return null;
+    }
+    if (this.scraping) {
+      if (!this.scraped.has(url)) this.schedule.add(url);
+      return null;
+    }
     this.scraping = true;
     const browser = await launch({
       headless: true,
       timeout: 3 * 60 * 1000,
       args: defaultArg
     });
-    const page = await browser.newPage();
-    page.on('pageerror', catchMsg);
-    await page.goto(url, { waitUntil: 'networkidle0', timeout: 3 * 60 * 1000 });
-    await page.waitForNetworkIdle();
-    const content = await page.content();
-    await browser.close();
+    let result = null as string;
+    try {
+      const page = await browser.newPage();
+      page.on('pageerror', catchMsg);
+      await page.goto(url, {
+        waitUntil: 'networkidle0',
+        timeout: 3 * 60 * 1000
+      });
+      await page.waitForNetworkIdle();
+      const content = await page.content();
+
+      result = await this.removeUnwantedHtml(content);
+      result = await this.removeDuplicateScript(result);
+      result = await this.fixInners(result);
+      result = await this.fixSeoFromHtml(result);
+      result = await this.setIdentifierFromHtml(result);
+      if (isDev) {
+        result = prettier.format(
+          result,
+          Object.assign(prettierOptions, { parser: 'html' })
+        );
+      }
+    } catch {
+      //
+    } finally {
+      await browser.close();
+    }
+    this.scraped.add(url);
     this.scraping = false;
-    let result = await this.removeUnwantedHtml(content);
-    result = await this.removeDuplicateScript(result);
-    result = await this.fixInners(result);
-    result = await this.fixSeoFromHtml(result);
-    result = await this.setIdentifierFromHtml(result);
-    if (isDev) {
-      return prettier.format(
-        result,
-        Object.assign(prettierOptions, { parser: 'html' })
-      );
+    if (this.schedule.size > 0) {
+      const next = this.schedule.values().next().value;
+      this.schedule.delete(next);
+      this.scrape(next);
     }
     return result;
   }

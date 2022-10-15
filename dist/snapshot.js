@@ -62,15 +62,35 @@ var Snapshot = /** @class */ (function () {
     function Snapshot() {
         this.links = new Set();
         this.scraping = false;
+        /**
+         * scrape url schedule list
+         */
+        this.schedule = new Set();
+        /**
+         * scraped url list
+         */
+        this.scraped = new Set();
     }
+    /**
+     * scrape url
+     * @param url
+     * @returns
+     */
     Snapshot.prototype.scrape = function (url) {
         return __awaiter(this, void 0, void 0, function () {
-            var browser, page, content, result;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
+            var browser, result, page, content, _a, next;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
                     case 0:
-                        if (this.scraping)
+                        // skip url that already scraped
+                        if (this.scraped.has(url)) {
                             return [2 /*return*/, null];
+                        }
+                        if (this.scraping) {
+                            if (!this.scraped.has(url))
+                                this.schedule.add(url);
+                            return [2 /*return*/, null];
+                        }
                         this.scraping = true;
                         return [4 /*yield*/, (0, puppeteer_1.launch)({
                                 headless: true,
@@ -78,41 +98,60 @@ var Snapshot = /** @class */ (function () {
                                 args: puppeteer_2.defaultArg
                             })];
                     case 1:
-                        browser = _a.sent();
-                        return [4 /*yield*/, browser.newPage()];
+                        browser = _b.sent();
+                        result = null;
+                        _b.label = 2;
                     case 2:
-                        page = _a.sent();
-                        page.on('pageerror', noop_1.catchMsg);
-                        return [4 /*yield*/, page.goto(url, { waitUntil: 'networkidle0', timeout: 3 * 60 * 1000 })];
+                        _b.trys.push([2, 12, 13, 15]);
+                        return [4 /*yield*/, browser.newPage()];
                     case 3:
-                        _a.sent();
-                        return [4 /*yield*/, page.waitForNetworkIdle()];
+                        page = _b.sent();
+                        page.on('pageerror', noop_1.catchMsg);
+                        return [4 /*yield*/, page.goto(url, {
+                                waitUntil: 'networkidle0',
+                                timeout: 3 * 60 * 1000
+                            })];
                     case 4:
-                        _a.sent();
-                        return [4 /*yield*/, page.content()];
+                        _b.sent();
+                        return [4 /*yield*/, page.waitForNetworkIdle()];
                     case 5:
-                        content = _a.sent();
-                        return [4 /*yield*/, browser.close()];
+                        _b.sent();
+                        return [4 /*yield*/, page.content()];
                     case 6:
-                        _a.sent();
-                        this.scraping = false;
+                        content = _b.sent();
                         return [4 /*yield*/, this.removeUnwantedHtml(content)];
                     case 7:
-                        result = _a.sent();
+                        result = _b.sent();
                         return [4 /*yield*/, this.removeDuplicateScript(result)];
                     case 8:
-                        result = _a.sent();
+                        result = _b.sent();
                         return [4 /*yield*/, this.fixInners(result)];
                     case 9:
-                        result = _a.sent();
+                        result = _b.sent();
                         return [4 /*yield*/, this.fixSeoFromHtml(result)];
                     case 10:
-                        result = _a.sent();
+                        result = _b.sent();
                         return [4 /*yield*/, this.setIdentifierFromHtml(result)];
                     case 11:
-                        result = _a.sent();
+                        result = _b.sent();
                         if (env_1.isDev) {
-                            return [2 /*return*/, prettier_1["default"].format(result, Object.assign(_prettierrc_1["default"], { parser: 'html' }))];
+                            result = prettier_1["default"].format(result, Object.assign(_prettierrc_1["default"], { parser: 'html' }));
+                        }
+                        return [3 /*break*/, 15];
+                    case 12:
+                        _a = _b.sent();
+                        return [3 /*break*/, 15];
+                    case 13: return [4 /*yield*/, browser.close()];
+                    case 14:
+                        _b.sent();
+                        return [7 /*endfinally*/];
+                    case 15:
+                        this.scraped.add(url);
+                        this.scraping = false;
+                        if (this.schedule.size > 0) {
+                            next = this.schedule.values().next().value;
+                            this.schedule["delete"](next);
+                            this.scrape(next);
                         }
                         return [2 /*return*/, result];
                 }

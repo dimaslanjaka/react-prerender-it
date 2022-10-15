@@ -9,6 +9,19 @@ export declare const pkgJson: pkgType;
 export declare class Snapshot {
     links: Set<string>;
     scraping: boolean;
+    /**
+     * scrape url schedule list
+     */
+    schedule: Set<string>;
+    /**
+     * scraped url list
+     */
+    scraped: Set<string>;
+    /**
+     * scrape url
+     * @param url
+     * @returns
+     */
     scrape(url: string): Promise<string>;
     removeUnwantedHtml(html: string | ArrayBuffer | DataView): Promise<string>;
     removeDuplicateScript(html: string | ArrayBuffer | DataView): Promise<string>;
