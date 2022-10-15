@@ -24,7 +24,7 @@ export interface ServerSnapshotOptions {
   /**
    * Add paths to server-static
    */
-  registerStatic: string[];
+  registerStatic?: string[];
   /**
    * Destination folder save
    */
@@ -36,7 +36,7 @@ export interface ServerSnapshotOptions {
   /**
    * Auto detect internal links and crawl them
    */
-  autoRoutes: boolean;
+  autoRoutes?: boolean;
 }
 
 export function ServerSnapshot(options: ServerSnapshotOptions) {
@@ -45,7 +45,7 @@ export function ServerSnapshot(options: ServerSnapshotOptions) {
     dest: join(process.cwd(), 'tmp'),
     registerStatic: [],
     routes: [],
-    autoRoutes: true
+    autoRoutes: false
   };
   // assign options with the default options
   options = Object.assign(defaults, options);

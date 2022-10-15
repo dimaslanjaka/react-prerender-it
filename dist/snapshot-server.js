@@ -63,7 +63,7 @@ function ServerSnapshot(options) {
         dest: (0, upath_1.join)(process.cwd(), 'tmp'),
         registerStatic: [],
         routes: [],
-        autoRoutes: true
+        autoRoutes: false
     };
     // assign options with the default options
     options = Object.assign(defaults, options);

@@ -8,7 +8,7 @@ export interface ServerSnapshotOptions {
     /**
      * Add paths to server-static
      */
-    registerStatic: string[];
+    registerStatic?: string[];
     /**
      * Destination folder save
      */
@@ -20,7 +20,7 @@ export interface ServerSnapshotOptions {
     /**
      * Auto detect internal links and crawl them
      */
-    autoRoutes: boolean;
+    autoRoutes?: boolean;
 }
 export declare function ServerSnapshot(options: ServerSnapshotOptions): Bluebird<{
     server: import("http").Server<typeof import("http").IncomingMessage, typeof import("http").ServerResponse>;
