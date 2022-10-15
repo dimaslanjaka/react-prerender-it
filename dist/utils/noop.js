@@ -2,7 +2,7 @@
 exports.__esModule = true;
 exports.catchMsg = exports.noop = void 0;
 /**
- * No operations
+ * No operations on catch
  * @param _args
  */
 function noop() {

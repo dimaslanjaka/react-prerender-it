@@ -1,9 +1,11 @@
 import { Snapshot } from './snapshot';
 import { ServerSnapshot, ServerSnapshotOptions } from './snapshot-server';
+import noop from './utils/noop';
 
 export const ReactPrerenderIt = {
   Snapshot,
-  ServerSnapshot
+  ServerSnapshot,
+  noop
 };
 export default ReactPrerenderIt;
-export { Snapshot, ServerSnapshotOptions, ServerSnapshot };
+export { noop, Snapshot, ServerSnapshotOptions, ServerSnapshot };

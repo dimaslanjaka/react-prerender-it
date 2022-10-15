@@ -1,8 +1,10 @@
 import { Snapshot } from './snapshot';
 import { ServerSnapshot, ServerSnapshotOptions } from './snapshot-server';
+import noop from './utils/noop';
 export declare const ReactPrerenderIt: {
     Snapshot: typeof Snapshot;
     ServerSnapshot: typeof ServerSnapshot;
+    noop: typeof noop;
 };
 export default ReactPrerenderIt;
-export { Snapshot, ServerSnapshotOptions, ServerSnapshot };
+export { noop, Snapshot, ServerSnapshotOptions, ServerSnapshot };
