@@ -55,14 +55,16 @@ export class Snapshot {
     if (this.scraped.has(url)) {
       return null;
     }
+    // add to schedule when indicator is true
     if (this.scraping) {
       if (!this.scraped.has(url)) this.schedule.add(url);
       return null;
     }
+    // set indicator true
     this.scraping = true;
-
+    // launc browser
     const browser = await this.launchBrowser();
-
+    // init result default null
     let result = null as string;
     try {
       const page = await browser.newPage();
@@ -84,18 +86,20 @@ export class Snapshot {
       result = await this.fixSeoFromHtml(result);
       result = await this.setIdentifierFromHtml(result);
       if (isDev) {
+        console.log('development mode');
         result = prettier.format(
           result,
           Object.assign(prettierOptions, { parser: 'html' })
         );
       }
     } catch {
-      await browser.close();
-    } finally {
-      await browser.close();
+      //
     }
+    await browser.close();
     this.scraped.add(url);
+    // set indicator false
     this.scraping = false;
+    // iterate scheduled url
     if (this.schedule.size > 0) {
       const next = this.schedule.values().next().value;
       this.schedule.delete(next);

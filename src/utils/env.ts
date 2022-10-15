@@ -1,7 +1,1 @@
-export const isDev = (() => {
-  if (!process.env.NODE_ENV || process.env.NODE_ENV === 'development') {
-    return true
-  } else {
-    return false
-  }
-})()
+export const isDev = /dev/i.test(String(process.env.NODE_ENV));

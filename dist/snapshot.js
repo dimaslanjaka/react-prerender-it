@@ -101,11 +101,13 @@ var Snapshot = /** @class */ (function () {
                         if (this.scraped.has(url)) {
                             return [2 /*return*/, null];
                         }
+                        // add to schedule when indicator is true
                         if (this.scraping) {
                             if (!this.scraped.has(url))
                                 this.schedule.add(url);
                             return [2 /*return*/, null];
                         }
+                        // set indicator true
                         this.scraping = true;
                         return [4 /*yield*/, this.launchBrowser()];
                     case 1:
@@ -113,7 +115,7 @@ var Snapshot = /** @class */ (function () {
                         result = null;
                         _b.label = 2;
                     case 2:
-                        _b.trys.push([2, 12, 14, 16]);
+                        _b.trys.push([2, 12, , 13]);
                         return [4 /*yield*/, browser.newPage()];
                     case 3:
                         page = _b.sent();
@@ -150,22 +152,20 @@ var Snapshot = /** @class */ (function () {
                     case 11:
                         result = _b.sent();
                         if (env_1.isDev) {
+                            console.log('development mode');
                             result = prettier_1["default"].format(result, Object.assign(_prettierrc_1["default"], { parser: 'html' }));
                         }
-                        return [3 /*break*/, 16];
+                        return [3 /*break*/, 13];
                     case 12:
                         _a = _b.sent();
-                        return [4 /*yield*/, browser.close()];
-                    case 13:
+                        return [3 /*break*/, 13];
+                    case 13: return [4 /*yield*/, browser.close()];
+                    case 14:
                         _b.sent();
-                        return [3 /*break*/, 16];
-                    case 14: return [4 /*yield*/, browser.close()];
-                    case 15:
-                        _b.sent();
-                        return [7 /*endfinally*/];
-                    case 16:
                         this.scraped.add(url);
+                        // set indicator false
                         this.scraping = false;
+                        // iterate scheduled url
                         if (this.schedule.size > 0) {
                             next = this.schedule.values().next().value;
                             this.schedule["delete"](next);
