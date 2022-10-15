@@ -141,16 +141,15 @@ function ServerSnapshot(options) {
             return [2 /*return*/, res.sendFile(index200)];
         });
     }); });
-    return new bluebird_1["default"](function (resolveServer) {
-        var server = app.listen(4000, function () {
-            _debugExpress('listening http://localhost:4000');
-        });
-        resolveServer(server);
-    }).then(function (server) { return __awaiter(_this, void 0, void 0, function () {
-        var baseUrl, crawlRoutes, i, route, url;
+    return new bluebird_1["default"](function (resolveServer) { return __awaiter(_this, void 0, void 0, function () {
+        var AppServer, baseUrl, crawlRoutes, i, route, url;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
+                    AppServer = app.listen(4000, function () {
+                        _debugExpress('listening http://localhost:4000');
+                    });
+                    resolveServer({ server: AppServer, snap: snap });
                     baseUrl = (0, url_1.fixUrl)('http://localhost:4000/' + pathname);
                     return [4 /*yield*/, navigateScrape(baseUrl)];
                 case 1:
@@ -187,11 +186,11 @@ function ServerSnapshot(options) {
                     i++;
                     return [3 /*break*/, 2];
                 case 5:
-                    if (server.closeAllConnections) {
-                        server.closeAllConnections();
+                    if (AppServer.closeAllConnections) {
+                        AppServer.closeAllConnections();
                     }
                     else {
-                        server.close();
+                        AppServer.close();
                     }
                     return [2 /*return*/];
             }

@@ -1,5 +1,7 @@
+/// <reference types="node" />
 import Bluebird from 'bluebird';
 import 'core-js/actual/structured-clone';
+import { Snapshot } from './snapshot';
 export interface ServerSnapshotOptions {
     /** React Generated Dir */
     source: string;
@@ -20,4 +22,7 @@ export interface ServerSnapshotOptions {
      */
     autoRoutes: boolean;
 }
-export declare function ServerSnapshot(options: ServerSnapshotOptions): Bluebird<void>;
+export declare function ServerSnapshot(options: ServerSnapshotOptions): Bluebird<{
+    server: import("http").Server<typeof import("http").IncomingMessage, typeof import("http").ServerResponse>;
+    snap: Snapshot;
+}>;
