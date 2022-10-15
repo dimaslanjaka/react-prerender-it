@@ -128,7 +128,7 @@ export function ServerSnapshot(options: ServerSnapshotOptions) {
     return res.sendFile(index200);
   });
 
-  new Bluebird((resolveServer: (s: Server) => any) => {
+  return new Bluebird((resolveServer: (s: Server) => any) => {
     const server = app.listen(4000, () => {
       _debugExpress('listening http://localhost:4000');
     });

@@ -1,3 +1,4 @@
+import Bluebird from 'bluebird';
 import 'core-js/actual/structured-clone';
 export interface ServerSnapshotOptions {
     /** React Generated Dir */
@@ -19,4 +20,4 @@ export interface ServerSnapshotOptions {
      */
     autoRoutes: boolean;
 }
-export declare function ServerSnapshot(options: ServerSnapshotOptions): void;
+export declare function ServerSnapshot(options: ServerSnapshotOptions): Bluebird<void>;

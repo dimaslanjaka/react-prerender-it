@@ -141,7 +141,7 @@ function ServerSnapshot(options) {
             return [2 /*return*/, res.sendFile(index200)];
         });
     }); });
-    new bluebird_1["default"](function (resolveServer) {
+    return new bluebird_1["default"](function (resolveServer) {
         var server = app.listen(4000, function () {
             _debugExpress('listening http://localhost:4000');
         });
