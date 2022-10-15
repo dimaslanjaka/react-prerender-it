@@ -1,4 +1,3 @@
-import Bluebird from 'bluebird';
 import 'core-js/actual/structured-clone';
 import debuglib from 'debug';
 import express from 'express';
@@ -140,7 +139,7 @@ export function ServerSnapshot(options: ServerSnapshotOptions) {
     if (typeof options.callback === 'function') options.callback(resolved);
   };
 
-  new Bluebird(async (resolveServer: ServerSnapshotOptions['callback']) => {
+  const run = async () => {
     const AppServer = app.listen(4000, () => {
       _debugExpress('listening http://localhost:4000');
     });
@@ -185,9 +184,14 @@ export function ServerSnapshot(options: ServerSnapshotOptions) {
       //
     }
 
-    resolveServer({ server: AppServer, snap });
-  })
+    return { server: AppServer, snap };
+  };
+
+  run()
+    // callback when success
     .then(doCallback)
+    .catch(console.trace)
+    // callback when catch caught error
     .finally(() => {
       doCallback(null);
     });

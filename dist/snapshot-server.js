@@ -40,7 +40,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 exports.__esModule = true;
 exports.ServerSnapshot = void 0;
-var bluebird_1 = __importDefault(require("bluebird"));
 require("core-js/actual/structured-clone");
 var debug_1 = __importDefault(require("debug"));
 var express_1 = __importDefault(require("express"));
@@ -148,7 +147,7 @@ function ServerSnapshot(options) {
         if (typeof options.callback === 'function')
             options.callback(resolved);
     };
-    new bluebird_1["default"](function (resolveServer) { return __awaiter(_this, void 0, void 0, function () {
+    var run = function () { return __awaiter(_this, void 0, void 0, function () {
         var AppServer, baseUrl, crawlRoutes, i, route, url;
         return __generator(this, function (_a) {
             switch (_a.label) {
@@ -204,12 +203,13 @@ function ServerSnapshot(options) {
                     catch (_b) {
                         //
                     }
-                    resolveServer({ server: AppServer, snap: snap });
-                    return [2 /*return*/];
+                    return [2 /*return*/, { server: AppServer, snap: snap }];
             }
         });
-    }); })
-        .then(doCallback)["finally"](function () {
+    }); };
+    run()
+        // callback when success
+        .then(doCallback)["catch"](console.trace)["finally"](function () {
         doCallback(null);
     });
 }
