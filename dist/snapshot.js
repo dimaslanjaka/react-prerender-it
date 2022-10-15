@@ -226,7 +226,7 @@ var Snapshot = /** @class */ (function () {
     };
     Snapshot.prototype.removeDuplicateScript = function (html) {
         return __awaiter(this, void 0, void 0, function () {
-            var dom, window, document, scripts, result;
+            var dom, window, document, scripts, links, result;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
@@ -234,12 +234,21 @@ var Snapshot = /** @class */ (function () {
                         window = dom.window;
                         document = dom.window.document;
                         scripts = [];
-                        document.querySelectorAll('script').forEach(function (el) {
+                        Array.from(document.querySelectorAll('script')).forEach(function (el) {
                             if (scripts.includes(el.src)) {
                                 el.remove();
                             }
                             else {
                                 scripts.push(el.src);
+                            }
+                        });
+                        links = [];
+                        Array.from(document.querySelectorAll('link')).forEach(function (el) {
+                            if (links.includes(el.href)) {
+                                el.remove();
+                            }
+                            else {
+                                links.push(el.href);
                             }
                         });
                         return [4 /*yield*/, this.serializeHtml(dom)["finally"](function () {
@@ -300,8 +309,8 @@ var Snapshot = /** @class */ (function () {
                         scripts = Array.from(document.querySelectorAll('script'));
                         for (i = 0; i < scripts.length; i++) {
                             script = scripts[i];
-                            if (script.src.includes('c.disquscdn.com/next/embed') ||
-                                script.src.includes('&amp;l=dataLayer&amp;'))
+                            if (script.src.includes('c.disquscdn.com') ||
+                                script.src.includes('l=dataLayer'))
                                 script.remove();
                         }
                         iframes = Array.from(document.querySelectorAll('iframe'));

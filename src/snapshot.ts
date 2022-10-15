@@ -152,15 +152,25 @@ export class Snapshot {
     const window = dom.window;
     const document = dom.window.document;
 
-    // remove duplicate src script
+    // remove duplicated src script
     const scripts: string[] = [];
-    document.querySelectorAll('script').forEach((el) => {
+    Array.from(document.querySelectorAll('script')).forEach((el) => {
       if (scripts.includes(el.src)) {
         el.remove();
       } else {
         scripts.push(el.src);
       }
     });
+    // remove duplicated links
+    const links: string[] = [];
+    Array.from(document.querySelectorAll('link')).forEach((el) => {
+      if (links.includes(el.href)) {
+        el.remove();
+      } else {
+        links.push(el.href);
+      }
+    });
+
     const result = await this.serializeHtml(dom).finally(() => {
       window.close();
     });
@@ -208,8 +218,9 @@ export class Snapshot {
     for (let i = 0; i < scripts.length; i++) {
       const script = scripts[i];
       if (
-        script.src.includes('c.disquscdn.com/next/embed') ||
-        script.src.includes('&amp;l=dataLayer&amp;')
+        script.src.includes('c.disquscdn.com') ||
+        // fix auto cdn google analytics
+        script.src.includes('l=dataLayer')
       )
         script.remove();
     }
