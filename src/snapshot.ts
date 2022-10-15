@@ -44,7 +44,7 @@ export class Snapshot {
     this.scraping = false;
     let result = await this.removeUnwantedHtml(content);
     result = await this.removeDuplicateScript(result);
-    result = await this.fixAdsenseFromHtml(result);
+    result = await this.fixInners(result);
     result = await this.fixSeoFromHtml(result);
     result = await this.setIdentifierFromHtml(result);
     if (isDev) {
@@ -114,19 +114,23 @@ export class Snapshot {
     return result;
   }
 
-  async fixAdsenseFromHtml(html: string | ArrayBuffer | DataView) {
+  async fixInners(html: string | ArrayBuffer | DataView) {
     // parsing
     const dom = new JSDOM(html);
     const window = dom.window;
     const document = dom.window.document;
 
-    // remove inner html ins
+    // remove inner html ins adsense
     Array.from(document.querySelectorAll('ins.adsbygoogle')).forEach((el) => {
       el.innerHTML = '';
       el.removeAttribute('data-ad-status');
       el.removeAttribute('data-adtest');
       el.removeAttribute('data-adsbygoogle-status');
     });
+    // remove inner disqus comment
+    if (document.getElementById('disqus_thread')) {
+      document.getElementById('disqus_thread').innerHTML = '';
+    }
     const result = await this.serializeHtml(dom).finally(() => {
       window.close();
     });

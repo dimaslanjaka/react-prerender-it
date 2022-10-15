@@ -12,7 +12,7 @@ export declare class Snapshot {
     scrape(url: string): Promise<string>;
     removeUnwantedHtml(html: string | ArrayBuffer | DataView): Promise<string>;
     removeDuplicateScript(html: string | ArrayBuffer | DataView): Promise<string>;
-    fixAdsenseFromHtml(html: string | ArrayBuffer | DataView): Promise<string>;
+    fixInners(html: string | ArrayBuffer | DataView): Promise<string>;
     fixSeoFromHtml(html: string | Buffer | BinaryData): Promise<string>;
     setIdentifierFromHtml(html: string | ArrayBuffer | DataView | undefined): Promise<string>;
     serializeHtml(dom: JSDOM): Promise<string>;

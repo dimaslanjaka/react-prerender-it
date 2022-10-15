@@ -102,7 +102,7 @@ var Snapshot = /** @class */ (function () {
                         return [4 /*yield*/, this.removeDuplicateScript(result)];
                     case 8:
                         result = _a.sent();
-                        return [4 /*yield*/, this.fixAdsenseFromHtml(result)];
+                        return [4 /*yield*/, this.fixInners(result)];
                     case 9:
                         result = _a.sent();
                         return [4 /*yield*/, this.fixSeoFromHtml(result)];
@@ -192,7 +192,7 @@ var Snapshot = /** @class */ (function () {
             });
         });
     };
-    Snapshot.prototype.fixAdsenseFromHtml = function (html) {
+    Snapshot.prototype.fixInners = function (html) {
         return __awaiter(this, void 0, void 0, function () {
             var dom, window, document, result;
             return __generator(this, function (_a) {
@@ -201,13 +201,17 @@ var Snapshot = /** @class */ (function () {
                         dom = new jsdom_1.JSDOM(html);
                         window = dom.window;
                         document = dom.window.document;
-                        // remove inner html ins
+                        // remove inner html ins adsense
                         Array.from(document.querySelectorAll('ins.adsbygoogle')).forEach(function (el) {
                             el.innerHTML = '';
                             el.removeAttribute('data-ad-status');
                             el.removeAttribute('data-adtest');
                             el.removeAttribute('data-adsbygoogle-status');
                         });
+                        // remove inner disqus comment
+                        if (document.getElementById('disqus_thread')) {
+                            document.getElementById('disqus_thread').innerHTML = '';
+                        }
                         return [4 /*yield*/, this.serializeHtml(dom)["finally"](function () {
                                 window.close();
                             })];
