@@ -284,7 +284,7 @@ var Snapshot = /** @class */ (function () {
     };
     Snapshot.prototype.fixCdn = function (html) {
         return __awaiter(this, void 0, void 0, function () {
-            var dom, window, document, links, i, link, result;
+            var dom, window, document, links, i, link, scripts, i, script, result;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
@@ -296,6 +296,12 @@ var Snapshot = /** @class */ (function () {
                             link = links[i];
                             if (link.href.includes('c.disquscdn.com/next/embed'))
                                 link.remove();
+                        }
+                        scripts = Array.from(document.querySelectorAll('script'));
+                        for (i = 0; i < scripts.length; i++) {
+                            script = scripts[i];
+                            if (script.src.includes('c.disquscdn.com/next/embed') || script.src.includes('&amp;l=dataLayer&amp;'))
+                                script.remove();
                         }
                         return [4 /*yield*/, this.serializeHtml(dom)["finally"](function () {
                                 window.close();

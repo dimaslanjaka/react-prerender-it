@@ -204,6 +204,12 @@ export class Snapshot {
       if (link.href.includes('c.disquscdn.com/next/embed')) link.remove();
     }
 
+    const scripts = Array.from(document.querySelectorAll('script'));
+    for (let i = 0; i < scripts.length; i++) {
+      const script = scripts[i];
+      if (script.src.includes('c.disquscdn.com/next/embed') || script.src.includes('&amp;l=dataLayer&amp;')) script.remove();
+    }
+
     const result = await this.serializeHtml(dom).finally(() => {
       window.close();
     });
