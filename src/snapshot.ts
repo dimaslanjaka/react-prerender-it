@@ -86,7 +86,7 @@ export class Snapshot {
       result = await this.fixSeoFromHtml(result);
       result = await this.setIdentifierFromHtml(result);
       if (isDev) {
-        console.log('development mode');
+        debug('env')('development mode');
         result = prettier.format(
           result,
           Object.assign(prettierOptions, { parser: 'html' })
