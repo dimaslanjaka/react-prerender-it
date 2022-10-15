@@ -85,6 +85,7 @@ export class Snapshot {
       result = await this.fixInners(result);
       result = await this.fixSeoFromHtml(result);
       result = await this.setIdentifierFromHtml(result);
+      result = await this.fixCdn(result);
       if (isDev) {
         debug('env')('development mode');
         result = prettier.format(
@@ -185,6 +186,24 @@ export class Snapshot {
     ).forEach((el) => {
       el.innerHTML = '';
     });
+    const result = await this.serializeHtml(dom).finally(() => {
+      window.close();
+    });
+    return result;
+  }
+
+  async fixCdn(html: string | ArrayBuffer | DataView) {
+    // parsing
+    const dom = new JSDOM(html);
+    const window = dom.window;
+    const document = dom.window.document;
+
+    const links = Array.from(document.querySelectorAll('link'));
+    for (let i = 0; i < links.length; i++) {
+      const link = links[i];
+      if (link.href.includes('c.disquscdn.com/next/embed')) link.remove();
+    }
+
     const result = await this.serializeHtml(dom).finally(() => {
       window.close();
     });

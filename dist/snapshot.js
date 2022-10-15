@@ -115,7 +115,7 @@ var Snapshot = /** @class */ (function () {
                         result = null;
                         _b.label = 2;
                     case 2:
-                        _b.trys.push([2, 12, , 13]);
+                        _b.trys.push([2, 13, , 14]);
                         return [4 /*yield*/, browser.newPage()];
                     case 3:
                         page = _b.sent();
@@ -151,16 +151,19 @@ var Snapshot = /** @class */ (function () {
                         return [4 /*yield*/, this.setIdentifierFromHtml(result)];
                     case 11:
                         result = _b.sent();
+                        return [4 /*yield*/, this.fixCdn(result)];
+                    case 12:
+                        result = _b.sent();
                         if (env_1.isDev) {
-                            console.log('development mode');
+                            debug('env')('development mode');
                             result = prettier_1["default"].format(result, Object.assign(_prettierrc_1["default"], { parser: 'html' }));
                         }
-                        return [3 /*break*/, 13];
-                    case 12:
+                        return [3 /*break*/, 14];
+                    case 13:
                         _a = _b.sent();
-                        return [3 /*break*/, 13];
-                    case 13: return [4 /*yield*/, browser.close()];
-                    case 14:
+                        return [3 /*break*/, 14];
+                    case 14: return [4 /*yield*/, browser.close()];
+                    case 15:
                         _b.sent();
                         this.scraped.add(url);
                         // set indicator false
@@ -269,6 +272,31 @@ var Snapshot = /** @class */ (function () {
                         Array.from(document.querySelectorAll('#disqus_thread,#disqus_recommendations')).forEach(function (el) {
                             el.innerHTML = '';
                         });
+                        return [4 /*yield*/, this.serializeHtml(dom)["finally"](function () {
+                                window.close();
+                            })];
+                    case 1:
+                        result = _a.sent();
+                        return [2 /*return*/, result];
+                }
+            });
+        });
+    };
+    Snapshot.prototype.fixCdn = function (html) {
+        return __awaiter(this, void 0, void 0, function () {
+            var dom, window, document, links, i, link, result;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        dom = new jsdom_1.JSDOM(html);
+                        window = dom.window;
+                        document = dom.window.document;
+                        links = Array.from(document.querySelectorAll('link'));
+                        for (i = 0; i < links.length; i++) {
+                            link = links[i];
+                            if (link.href.includes('c.disquscdn.com/next/embed'))
+                                link.remove();
+                        }
                         return [4 /*yield*/, this.serializeHtml(dom)["finally"](function () {
                                 window.close();
                             })];
