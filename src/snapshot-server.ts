@@ -140,9 +140,36 @@ export function ServerSnapshot(options: ServerSnapshotOptions) {
   };
 
   const run = async () => {
-    const AppServer = app.listen(4000, () => {
+    const server = app.listen(4000, () => {
       _debugExpress('listening http://localhost:4000');
     });
+
+    process.on('SIGINT', gracefulShutdown);
+    process.on('SIGTERM', gracefulShutdown);
+
+    function gracefulShutdown(signal: any) {
+      if (signal) console.log(`\nReceived signal ${signal}`);
+      console.log('Gracefully closing http server');
+
+      // closeAllConnections() is only available from Node v18.02
+      if (server.closeAllConnections) server.closeAllConnections();
+      else setTimeout(() => process.exit(0), 5000);
+
+      try {
+        server.close(function (err) {
+          if (err) {
+            console.error('There was an error', err);
+            process.exit(1);
+          } else {
+            console.log('http server closed successfully. Exiting!');
+            process.exit(0);
+          }
+        });
+      } catch (err) {
+        console.error('There was an error', err);
+        setTimeout(() => process.exit(1), 500);
+      }
+    }
 
     const baseUrl = fixUrl('http://localhost:4000/' + pathname);
     await navigateScrape(baseUrl);
@@ -172,19 +199,9 @@ export function ServerSnapshot(options: ServerSnapshotOptions) {
       await navigateScrape(url);
     }
 
-    /*if (AppServer.closeAllConnections) {
-      AppServer.closeAllConnections();
-    } else {
-      AppServer.close();
-    }*/
-    try {
-      AppServer.closeAllConnections();
-      AppServer.close();
-    } catch {
-      //
-    }
+    gracefulShutdown(null);
 
-    return { server: AppServer, snap };
+    return { server: server, snap };
   };
 
   run()

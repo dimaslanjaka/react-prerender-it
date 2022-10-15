@@ -148,13 +148,41 @@ function ServerSnapshot(options) {
             options.callback(resolved);
     };
     var run = function () { return __awaiter(_this, void 0, void 0, function () {
-        var AppServer, baseUrl, crawlRoutes, i, route, url;
+        function gracefulShutdown(signal) {
+            if (signal)
+                console.log("\nReceived signal ".concat(signal));
+            console.log('Gracefully closing http server');
+            // closeAllConnections() is only available from Node v18.02
+            if (server.closeAllConnections)
+                server.closeAllConnections();
+            else
+                setTimeout(function () { return process.exit(0); }, 5000);
+            try {
+                server.close(function (err) {
+                    if (err) {
+                        console.error('There was an error', err);
+                        process.exit(1);
+                    }
+                    else {
+                        console.log('http server closed successfully. Exiting!');
+                        process.exit(0);
+                    }
+                });
+            }
+            catch (err) {
+                console.error('There was an error', err);
+                setTimeout(function () { return process.exit(1); }, 500);
+            }
+        }
+        var server, baseUrl, crawlRoutes, i, route, url;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    AppServer = app.listen(4000, function () {
+                    server = app.listen(4000, function () {
                         _debugExpress('listening http://localhost:4000');
                     });
+                    process.on('SIGINT', gracefulShutdown);
+                    process.on('SIGTERM', gracefulShutdown);
                     baseUrl = (0, url_1.fixUrl)('http://localhost:4000/' + pathname);
                     return [4 /*yield*/, navigateScrape(baseUrl)];
                 case 1:
@@ -191,19 +219,8 @@ function ServerSnapshot(options) {
                     i++;
                     return [3 /*break*/, 2];
                 case 5:
-                    /*if (AppServer.closeAllConnections) {
-                      AppServer.closeAllConnections();
-                    } else {
-                      AppServer.close();
-                    }*/
-                    try {
-                        AppServer.closeAllConnections();
-                        AppServer.close();
-                    }
-                    catch (_b) {
-                        //
-                    }
-                    return [2 /*return*/, { server: AppServer, snap: snap }];
+                    gracefulShutdown(null);
+                    return [2 /*return*/, { server: server, snap: snap }];
             }
         });
     }); };

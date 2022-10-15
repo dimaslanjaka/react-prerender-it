@@ -17,6 +17,7 @@ export declare class Snapshot {
      * scraped url list
      */
     scraped: Set<string>;
+    launchBrowser(): Promise<import("puppeteer").Browser>;
     /**
      * scrape url
      * @param url

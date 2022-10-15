@@ -42,6 +42,7 @@ exports.__esModule = true;
 exports.workspace = exports.save = exports.Snapshot = exports.pkgJson = void 0;
 /* eslint-disable @typescript-eslint/no-this-alias */
 var bluebird_1 = __importDefault(require("bluebird"));
+var debug_1 = __importDefault(require("debug"));
 var fs_1 = require("fs");
 var jsdom_1 = require("jsdom");
 var prettier_1 = __importDefault(require("prettier"));
@@ -51,7 +52,7 @@ var _prettierrc_1 = __importDefault(require("./.prettierrc"));
 var puppeteer_2 = require("./puppeteer");
 var array_1 = require("./utils/array");
 var env_1 = require("./utils/env");
-var noop_1 = require("./utils/noop");
+var debug = function (suffix) { return (0, debug_1["default"])('prerender-it-' + suffix); };
 var tempPkg = (0, upath_1.join)(__dirname, 'temp-package.json');
 if (!(0, fs_1.existsSync)(tempPkg))
     save(tempPkg, '{}');
@@ -71,6 +72,20 @@ var Snapshot = /** @class */ (function () {
          */
         this.scraped = new Set();
     }
+    Snapshot.prototype.launchBrowser = function () {
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, (0, puppeteer_1.launch)({
+                            headless: true,
+                            timeout: 3 * 60 * 1000,
+                            args: puppeteer_2.defaultArg
+                        })];
+                    case 1: return [2 /*return*/, _a.sent()];
+                }
+            });
+        });
+    };
     /**
      * scrape url
      * @param url
@@ -92,21 +107,20 @@ var Snapshot = /** @class */ (function () {
                             return [2 /*return*/, null];
                         }
                         this.scraping = true;
-                        return [4 /*yield*/, (0, puppeteer_1.launch)({
-                                headless: true,
-                                timeout: 3 * 60 * 1000,
-                                args: puppeteer_2.defaultArg
-                            })];
+                        return [4 /*yield*/, this.launchBrowser()];
                     case 1:
                         browser = _b.sent();
                         result = null;
                         _b.label = 2;
                     case 2:
-                        _b.trys.push([2, 12, 13, 15]);
+                        _b.trys.push([2, 12, 14, 16]);
                         return [4 /*yield*/, browser.newPage()];
                     case 3:
                         page = _b.sent();
-                        page.on('pageerror', noop_1.catchMsg);
+                        page.on('pageerror', function (e) {
+                            debug('error')('page error', e.message);
+                            browser.close();
+                        });
                         return [4 /*yield*/, page.goto(url, {
                                 waitUntil: 'networkidle0',
                                 timeout: 3 * 60 * 1000
@@ -121,6 +135,7 @@ var Snapshot = /** @class */ (function () {
                         content = _b.sent();
                         return [4 /*yield*/, this.removeUnwantedHtml(content)];
                     case 7:
+                        //await page.close();
                         result = _b.sent();
                         return [4 /*yield*/, this.removeDuplicateScript(result)];
                     case 8:
@@ -137,15 +152,18 @@ var Snapshot = /** @class */ (function () {
                         if (env_1.isDev) {
                             result = prettier_1["default"].format(result, Object.assign(_prettierrc_1["default"], { parser: 'html' }));
                         }
-                        return [3 /*break*/, 15];
+                        return [3 /*break*/, 16];
                     case 12:
                         _a = _b.sent();
-                        return [3 /*break*/, 15];
-                    case 13: return [4 /*yield*/, browser.close()];
-                    case 14:
+                        return [4 /*yield*/, browser.close()];
+                    case 13:
+                        _b.sent();
+                        return [3 /*break*/, 16];
+                    case 14: return [4 /*yield*/, browser.close()];
+                    case 15:
                         _b.sent();
                         return [7 /*endfinally*/];
-                    case 15:
+                    case 16:
                         this.scraped.add(url);
                         this.scraping = false;
                         if (this.schedule.size > 0) {

@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-this-alias */
 import Bluebird from 'bluebird';
+import debuglib from 'debug';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
 import { BinaryData, JSDOM } from 'jsdom';
 import prettier from 'prettier';
@@ -10,7 +11,8 @@ import { defaultArg } from './puppeteer';
 import pkgTempFile from './temp-package.json';
 import { array_unique } from './utils/array';
 import { isDev } from './utils/env';
-import { catchMsg } from './utils/noop';
+
+const debug = (suffix: string) => debuglib('prerender-it-' + suffix);
 
 type pkgType = typeof pkgTempFile & {
   homepage: string;
@@ -35,6 +37,14 @@ export class Snapshot {
    */
   scraped = new Set<string>();
 
+  async launchBrowser() {
+    return await launch({
+      headless: true,
+      timeout: 3 * 60 * 1000,
+      args: defaultArg
+    });
+  }
+
   /**
    * scrape url
    * @param url
@@ -50,21 +60,23 @@ export class Snapshot {
       return null;
     }
     this.scraping = true;
-    const browser = await launch({
-      headless: true,
-      timeout: 3 * 60 * 1000,
-      args: defaultArg
-    });
+
+    const browser = await this.launchBrowser();
+
     let result = null as string;
     try {
       const page = await browser.newPage();
-      page.on('pageerror', catchMsg);
+      page.on('pageerror', function (e) {
+        debug('error')('page error', e.message);
+        browser.close();
+      });
       await page.goto(url, {
         waitUntil: 'networkidle0',
         timeout: 3 * 60 * 1000
       });
       await page.waitForNetworkIdle();
       const content = await page.content();
+      //await page.close();
 
       result = await this.removeUnwantedHtml(content);
       result = await this.removeDuplicateScript(result);
@@ -78,7 +90,7 @@ export class Snapshot {
         );
       }
     } catch {
-      //
+      await browser.close();
     } finally {
       await browser.close();
     }
