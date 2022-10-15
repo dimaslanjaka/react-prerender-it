@@ -1,6 +1,6 @@
 {
   "name": "react-prerender-it",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "Generate static files from React production using Gulp",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
