@@ -45,6 +45,6 @@ nodemon
 ```
 
 ## Important notice
-> If it feels long, try activating `DEBUG=prerender-it*`
+> If it feels long, try activating `DEBUG=prerender-it*` with `cross-env or set`
 
 ## Pull Request Welcome

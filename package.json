@@ -4,6 +4,13 @@
   "description": "Generate static files from React production using Gulp",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "files": [
+    "readme.md",
+    "dist",
+    "src",
+    "LICENSE",
+    "*.json"
+  ],
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
     "test-build": "cd test && npm run update && cross-env-shell DISABLE_ESLINT_PLUGIN=true npm run build",
