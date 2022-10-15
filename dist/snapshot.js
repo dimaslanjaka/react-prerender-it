@@ -284,7 +284,7 @@ var Snapshot = /** @class */ (function () {
     };
     Snapshot.prototype.fixCdn = function (html) {
         return __awaiter(this, void 0, void 0, function () {
-            var dom, window, document, links, i, link, scripts, i, script, result;
+            var dom, window, document, links, i, link, scripts, i, script, iframes, i, iframe, noSrc, noCustomAttr, result;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
@@ -294,14 +294,24 @@ var Snapshot = /** @class */ (function () {
                         links = Array.from(document.querySelectorAll('link'));
                         for (i = 0; i < links.length; i++) {
                             link = links[i];
-                            if (link.href.includes('c.disquscdn.com/next/embed'))
+                            if (link.href.includes('c.disquscdn.com'))
                                 link.remove();
                         }
                         scripts = Array.from(document.querySelectorAll('script'));
                         for (i = 0; i < scripts.length; i++) {
                             script = scripts[i];
-                            if (script.src.includes('c.disquscdn.com/next/embed') || script.src.includes('&amp;l=dataLayer&amp;'))
+                            if (script.src.includes('c.disquscdn.com/next/embed') ||
+                                script.src.includes('&amp;l=dataLayer&amp;'))
                                 script.remove();
+                        }
+                        iframes = Array.from(document.querySelectorAll('iframe'));
+                        for (i = 0; i < iframes.length; i++) {
+                            iframe = iframes[i];
+                            noSrc = !iframe.hasAttribute('src') || !iframe.src;
+                            noCustomAttr = !iframe.hasAttribute('id') || !iframe.hasAttribute('class');
+                            if (noSrc && noCustomAttr && iframe.hasAttribute('style')) {
+                                iframe.remove();
+                            }
                         }
                         return [4 /*yield*/, this.serializeHtml(dom)["finally"](function () {
                                 window.close();

@@ -201,13 +201,30 @@ export class Snapshot {
     const links = Array.from(document.querySelectorAll('link'));
     for (let i = 0; i < links.length; i++) {
       const link = links[i];
-      if (link.href.includes('c.disquscdn.com/next/embed')) link.remove();
+      if (link.href.includes('c.disquscdn.com')) link.remove();
     }
 
     const scripts = Array.from(document.querySelectorAll('script'));
     for (let i = 0; i < scripts.length; i++) {
       const script = scripts[i];
-      if (script.src.includes('c.disquscdn.com/next/embed') || script.src.includes('&amp;l=dataLayer&amp;')) script.remove();
+      if (
+        script.src.includes('c.disquscdn.com/next/embed') ||
+        script.src.includes('&amp;l=dataLayer&amp;')
+      )
+        script.remove();
+    }
+
+    const iframes = Array.from(document.querySelectorAll('iframe'));
+    for (let i = 0; i < iframes.length; i++) {
+      const iframe = iframes[i];
+      // fix hidden adsense
+      // style="display: none;"
+      const noSrc = !iframe.hasAttribute('src') || !iframe.src;
+      const noCustomAttr =
+        !iframe.hasAttribute('id') || !iframe.hasAttribute('class');
+      if (noSrc && noCustomAttr && iframe.hasAttribute('style')) {
+        iframe.remove();
+      }
     }
 
     const result = await this.serializeHtml(dom).finally(() => {
