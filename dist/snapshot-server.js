@@ -149,7 +149,6 @@ function ServerSnapshot(options) {
                     AppServer = app.listen(4000, function () {
                         _debugExpress('listening http://localhost:4000');
                     });
-                    resolveServer({ server: AppServer, snap: snap });
                     baseUrl = (0, url_1.fixUrl)('http://localhost:4000/' + pathname);
                     return [4 /*yield*/, navigateScrape(baseUrl)];
                 case 1:
@@ -192,6 +191,7 @@ function ServerSnapshot(options) {
                     else {
                         AppServer.close();
                     }
+                    resolveServer({ server: AppServer, snap: snap });
                     return [2 /*return*/];
             }
         });

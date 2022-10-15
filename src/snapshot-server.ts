@@ -137,7 +137,7 @@ export function ServerSnapshot(options: ServerSnapshotOptions) {
       const AppServer = app.listen(4000, () => {
         _debugExpress('listening http://localhost:4000');
       });
-      resolveServer({ server: AppServer, snap });
+
       const baseUrl = fixUrl('http://localhost:4000/' + pathname);
       await navigateScrape(baseUrl);
       let crawlRoutes = routes || [];
@@ -171,6 +171,8 @@ export function ServerSnapshot(options: ServerSnapshotOptions) {
       } else {
         AppServer.close();
       }
+
+      resolveServer({ server: AppServer, snap });
     }
   );
 }
