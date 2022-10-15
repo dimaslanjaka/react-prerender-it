@@ -111,7 +111,9 @@ export function ServerSnapshot(options: ServerSnapshotOptions) {
               // remove double slash
               .replace(/\/+/, '/');
             const saveto = join(destDir, currentPathname);
-            save(saveto, html).then((path) => debug('save')(workspace(path)));
+            save(saveto, html).then((path) => {
+              debug('save')(workspace(path));
+            });
           }
         })
         .catch(console.trace)

@@ -127,7 +127,9 @@ function ServerSnapshot(options) {
                         // remove double slash
                         .replace(/\/+/, '/');
                     var saveto = (0, upath_1.join)(destDir, currentPathname);
-                    (0, snapshot_1.save)(saveto, html).then(function (path) { return debug('save')((0, snapshot_1.workspace)(path)); });
+                    (0, snapshot_1.save)(saveto, html).then(function (path) {
+                        debug('save')((0, snapshot_1.workspace)(path));
+                    });
                 }
             })["catch"](console.trace)["finally"](function () {
                 resolveScrape(null);

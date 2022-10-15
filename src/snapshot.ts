@@ -4,13 +4,13 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
 import { BinaryData, JSDOM } from 'jsdom';
 import prettier from 'prettier';
 import { launch } from 'puppeteer';
-import { toUnix, dirname, join } from 'upath';
+import { dirname, join, toUnix } from 'upath';
 import prettierOptions from './.prettierrc';
 import { defaultArg } from './puppeteer';
+import pkgTempFile from './temp-package.json';
 import { array_unique } from './utils/array';
 import { isDev } from './utils/env';
 import { catchMsg } from './utils/noop';
-import pkgTempFile from './temp-package.json';
 
 type pkgType = typeof pkgTempFile & {
   homepage: string;
