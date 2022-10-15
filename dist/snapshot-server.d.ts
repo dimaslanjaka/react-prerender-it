@@ -20,7 +20,7 @@ export interface ServerSnapshotOptions {
      * Auto detect internal links and crawl them
      */
     autoRoutes?: boolean;
-    callback?: (resolved: {
+    callback?: (resolved?: {
         server: ReturnType<ReturnType<typeof express>['listen']>;
         snap: Snapshot;
     }) => any;

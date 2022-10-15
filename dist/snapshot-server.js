@@ -144,6 +144,10 @@ function ServerSnapshot(options) {
             return [2 /*return*/, res.sendFile(index200)];
         });
     }); });
+    var doCallback = function (resolved) {
+        if (typeof options.callback === 'function')
+            options.callback(resolved);
+    };
     new bluebird_1["default"](function (resolveServer) { return __awaiter(_this, void 0, void 0, function () {
         var AppServer, baseUrl, crawlRoutes, i, route, url;
         return __generator(this, function (_a) {
@@ -204,9 +208,9 @@ function ServerSnapshot(options) {
                     return [2 /*return*/];
             }
         });
-    }); }).then(function (resolved) {
-        if (typeof options.callback === 'function')
-            options.callback(resolved);
+    }); })
+        .then(doCallback)["finally"](function () {
+        doCallback(null);
     });
 }
 exports.ServerSnapshot = ServerSnapshot;

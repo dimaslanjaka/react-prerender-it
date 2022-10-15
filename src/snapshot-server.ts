@@ -37,7 +37,7 @@ export interface ServerSnapshotOptions {
    * Auto detect internal links and crawl them
    */
   autoRoutes?: boolean;
-  callback?: (resolved: {
+  callback?: (resolved?: {
     server: ReturnType<ReturnType<typeof express>['listen']>;
     snap: Snapshot;
   }) => any;
@@ -134,6 +134,12 @@ export function ServerSnapshot(options: ServerSnapshotOptions) {
     return res.sendFile(index200);
   });
 
+  const doCallback = (
+    resolved: Parameters<ServerSnapshotOptions['callback']>[0]
+  ) => {
+    if (typeof options.callback === 'function') options.callback(resolved);
+  };
+
   new Bluebird(async (resolveServer: ServerSnapshotOptions['callback']) => {
     const AppServer = app.listen(4000, () => {
       _debugExpress('listening http://localhost:4000');
@@ -180,7 +186,9 @@ export function ServerSnapshot(options: ServerSnapshotOptions) {
     }
 
     resolveServer({ server: AppServer, snap });
-  }).then((resolved) => {
-    if (typeof options.callback === 'function') options.callback(resolved);
-  });
+  })
+    .then(doCallback)
+    .finally(() => {
+      doCallback(null);
+    });
 }
