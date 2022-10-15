@@ -44,4 +44,7 @@ npm run test-build
 nodemon
 ```
 
+## Important notice
+> If it feels long, try activating `DEBUG=prerender-it*`
+
 ## Pull Request Welcome
