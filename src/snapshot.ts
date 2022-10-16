@@ -278,13 +278,13 @@ export class Snapshot {
       if (item.trim().length > 0) this.links.add(item);
     });
     // seo external links
-    const hostname = new URL(pkg.homepage).host;
+    /*const hostname = new URL(pkg.homepage).host;
     anchors
       .filter((a) => /^https?:\/\//.test(a.href) && !a.href.includes(hostname))
       .forEach((a) => {
         a.rel = 'nofollow noopener noreferer';
         a.target = '_blank';
-      });
+      });*/
 
     const result = await this.serializeHtml(dom).finally(() => {
       window.close();

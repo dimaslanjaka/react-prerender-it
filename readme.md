@@ -8,7 +8,7 @@ Generate static files from React production
 - Support Google Adsense
 - Remove duplicate sources from generated html
 - Auto crawl internal links
-- Auto SEO external links
+- ~~Auto SEO external links~~
 
 ## Usage
 ```js
