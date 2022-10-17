@@ -40,11 +40,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 exports.__esModule = true;
-exports.fixParcelChunksIssue = exports.fixWebpackChunksIssue2 = exports.fixWebpackChunksIssue1 = exports.setid = exports.saveAsPng = exports.captureHyperlinks = exports.fixFormFields = exports.fixInsertRule = exports.removeBlobs = exports.preloadResources = void 0;
+exports.fixParcelChunksIssue = exports.fixWebpackChunksIssue2 = exports.fixWebpackChunksIssue1 = exports.setid = exports.saveAsPng = exports.captureHyperlinks = exports.fixFormFields = exports.fixInsertRule = exports.removeBlobs = exports.preloadResources = exports.debug = void 0;
 var debug_1 = __importDefault(require("debug"));
 var fs_1 = require("fs");
 var upath_1 = require("upath");
 var debug = function (suffix) { return (0, debug_1["default"])('prerender-it-' + suffix); };
+exports.debug = debug;
 var defaultOptions = {
     //# stable configurations
     port: 45678,
@@ -344,7 +345,6 @@ var fixWebpackChunksIssue1 = function (_a) {
         var mainRegexp = /main\.[\w]{8}.js|main\.[\w]{8}\.chunk\.js/;
         var mainScript = localScripts.find(function (x) { return mainRegexp.test(x.src); });
         var firstStyle = document.querySelector('style');
-        debug('debug')({ localScripts: localScripts, mainScript: mainScript });
         if (!mainScript)
             return;
         var chunkRegexp = /(\w+)\.[\w]{8}(\.chunk)?\.js/g;

@@ -5,7 +5,7 @@ import { existsSync, mkdirSync } from 'fs';
 import { Page } from 'puppeteer';
 import { dirname } from 'upath';
 
-const debug = (suffix: string) => debuglib('prerender-it-' + suffix);
+export const debug = (suffix: string) => debuglib('prerender-it-' + suffix);
 
 const defaultOptions = {
   //# stable configurations
@@ -299,8 +299,6 @@ export const fixWebpackChunksIssue1 = ({
       const mainRegexp = /main\.[\w]{8}.js|main\.[\w]{8}\.chunk\.js/;
       const mainScript = localScripts.find((x) => mainRegexp.test(x.src));
       const firstStyle = document.querySelector('style');
-
-      debug('debug')({ localScripts, mainScript });
 
       if (!mainScript) return;
 

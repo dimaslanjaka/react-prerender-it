@@ -151,7 +151,6 @@ export class Snapshot {
       //result = await this.removeUnwantedHtml(result);
       result = await this.removeDuplicateScript(result);
       result = await this.fixInners(result);
-      console.log('collect internal links');
       result = await this.fixSeoFromHtml(result);
       //result = await this.setIdentifierFromHtml(result);
       //result = await this.fixCdn(result);

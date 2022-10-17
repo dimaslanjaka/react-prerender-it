@@ -1,5 +1,6 @@
 /// <reference types="node" />
 import { Page } from 'puppeteer';
+export declare const debug: (suffix: string) => any;
 /**
  *
  * @param opt
