@@ -49,7 +49,6 @@ var prettier_1 = __importDefault(require("prettier"));
 var puppeteer_1 = require("puppeteer");
 var upath_1 = require("upath");
 var _prettierrc_1 = __importDefault(require("./.prettierrc"));
-var puppeteer_2 = require("./puppeteer");
 var array_1 = require("./utils/array");
 var env_1 = require("./utils/env");
 var debug = function (suffix) { return (0, debug_1["default"])('prerender-it-' + suffix); };
@@ -79,7 +78,20 @@ var Snapshot = /** @class */ (function () {
                     case 0: return [4 /*yield*/, (0, puppeteer_1.launch)({
                             headless: true,
                             timeout: 3 * 60 * 1000,
-                            args: puppeteer_2.defaultArg
+                            args: (0, array_1.array_unique)([
+                                '--user-data-dir=' + (0, upath_1.join)(process.cwd(), 'tmp/puppeteer_profile'),
+                                '--no-sandbox',
+                                '--disable-setuid-sandbox',
+                                '--disable-infobars',
+                                '--window-position=0,0',
+                                '--ignore-certifcate-errors',
+                                '--ignore-certifcate-errors-spki-list',
+                                '--ignoreHTTPSErrors=true',
+                                '--user-agent="Mozilla/5.0 (Linux; Android 6.0.1; Nexus 5X Build/MMB29P) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/W.X.Y.Z‡ Mobile Safari/537.36 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)"',
+                                '--disable-features=site-per-process',
+                                '--disable-web-security'
+                            ]),
+                            userDataDir: (0, upath_1.join)(process.cwd(), 'tmp/puppeteer_profile')
                         })];
                     case 1: return [2 /*return*/, _a.sent()];
                 }
@@ -115,7 +127,7 @@ var Snapshot = /** @class */ (function () {
                         result = null;
                         _b.label = 2;
                     case 2:
-                        _b.trys.push([2, 13, , 14]);
+                        _b.trys.push([2, 14, , 15]);
                         return [4 /*yield*/, browser.newPage()];
                     case 3:
                         page = _b.sent();
@@ -135,35 +147,37 @@ var Snapshot = /** @class */ (function () {
                         return [4 /*yield*/, page.content()];
                     case 6:
                         content = _b.sent();
-                        return [4 /*yield*/, this.removeUnwantedHtml(content)];
+                        return [4 /*yield*/, this.fixCRA1(result)];
                     case 7:
                         //await page.close();
                         result = _b.sent();
-                        return [4 /*yield*/, this.removeDuplicateScript(result)];
+                        return [4 /*yield*/, this.removeUnwantedHtml(content)];
                     case 8:
                         result = _b.sent();
-                        return [4 /*yield*/, this.fixInners(result)];
+                        return [4 /*yield*/, this.removeDuplicateScript(result)];
                     case 9:
                         result = _b.sent();
-                        return [4 /*yield*/, this.fixSeoFromHtml(result)];
+                        return [4 /*yield*/, this.fixInners(result)];
                     case 10:
                         result = _b.sent();
-                        return [4 /*yield*/, this.setIdentifierFromHtml(result)];
+                        return [4 /*yield*/, this.fixSeoFromHtml(result)];
                     case 11:
                         result = _b.sent();
-                        return [4 /*yield*/, this.fixCdn(result)];
+                        return [4 /*yield*/, this.setIdentifierFromHtml(result)];
                     case 12:
                         result = _b.sent();
+                        return [4 /*yield*/, this.fixCdn(result)];
+                    case 13:
+                        result = _b.sent();
                         if (env_1.isDev) {
-                            debug('env')('development mode');
                             result = prettier_1["default"].format(result, Object.assign(_prettierrc_1["default"], { parser: 'html' }));
                         }
-                        return [3 /*break*/, 14];
-                    case 13:
+                        return [3 /*break*/, 15];
+                    case 14:
                         _a = _b.sent();
-                        return [3 /*break*/, 14];
-                    case 14: return [4 /*yield*/, browser.close()];
-                    case 15:
+                        return [3 /*break*/, 15];
+                    case 15: return [4 /*yield*/, browser.close()];
+                    case 16:
                         _b.sent();
                         this.scraped.add(url);
                         // set indicator false
@@ -174,6 +188,69 @@ var Snapshot = /** @class */ (function () {
                             this.schedule["delete"](next);
                             this.scrape(next);
                         }
+                        return [2 /*return*/, result];
+                }
+            });
+        });
+    };
+    Snapshot.prototype.fixCRA1 = function (html) {
+        return __awaiter(this, void 0, void 0, function () {
+            var dom, window, document, basePath, localScripts, mainRegexp, mainScript, firstStyle, chunkRegexp, chunkScripts, mainScripts, createLink, i, x, result;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        dom = new jsdom_1.JSDOM(html);
+                        window = dom.window;
+                        document = dom.window.document;
+                        basePath = new URL(pkg.homepage).pathname;
+                        localScripts = Array.from(document.scripts).filter(function (x) { return x.src && x.src.startsWith(basePath); });
+                        mainRegexp = /main\.[\w]{8}.js|main\.[\w]{8}\.chunk\.js/;
+                        mainScript = localScripts.find(function (x) { return mainRegexp.test(x.src); });
+                        firstStyle = document.querySelector('style');
+                        if (!mainScript)
+                            return [2 /*return*/];
+                        chunkRegexp = /(\w+)\.[\w]{8}(\.chunk)?\.js/g;
+                        chunkScripts = localScripts.filter(function (x) {
+                            var matched = chunkRegexp.exec(x.src);
+                            // we need to reset state of RegExp https://stackoverflow.com/a/11477448
+                            chunkRegexp.lastIndex = 0;
+                            return matched && matched[1] !== 'main' && matched[1] !== 'vendors';
+                        });
+                        mainScripts = localScripts.filter(function (x) {
+                            var matched = chunkRegexp.exec(x.src);
+                            // we need to reset state of RegExp https://stackoverflow.com/a/11477448
+                            chunkRegexp.lastIndex = 0;
+                            return matched && (matched[1] === 'main' || matched[1] === 'vendors');
+                        });
+                        createLink = function (x) {
+                            var inlineCss = false;
+                            var http2PushManifest = false;
+                            if (http2PushManifest)
+                                return;
+                            var linkTag = document.createElement('link');
+                            linkTag.setAttribute('rel', 'preload');
+                            linkTag.setAttribute('as', 'script');
+                            linkTag.setAttribute('href', x.getAttribute('src').replace(basePath, ''));
+                            if (inlineCss) {
+                                firstStyle.parentNode.insertBefore(linkTag, firstStyle);
+                            }
+                            else {
+                                document.head.appendChild(linkTag);
+                            }
+                        };
+                        mainScripts.map(function (x) { return createLink(x); });
+                        for (i = chunkScripts.length - 1; i >= 0; --i) {
+                            x = chunkScripts[i];
+                            if (x.parentElement && mainScript.parentNode) {
+                                x.parentElement.removeChild(x);
+                                createLink(x);
+                            }
+                        }
+                        return [4 /*yield*/, this.serializeHtml(dom)["finally"](function () {
+                                window.close();
+                            })];
+                    case 1:
+                        result = _a.sent();
                         return [2 /*return*/, result];
                 }
             });
@@ -208,8 +285,11 @@ var Snapshot = /** @class */ (function () {
                             // auto generated adsense
                             '.adsbygoogle-noablate',
                             // auto generated adsense
-                            'iframe[src*="tpc.googlesyndication.com"]'
-                            //'script[src*="main."]',
+                            'iframe[src*="tpc.googlesyndication.com"]',
+                            // auto generated disqus
+                            'link[href="https://disqus.com/next/config.js"]',
+                            // auto generated disqus
+                            'script[src*=".disqus.com/recommendations.js"]'
                         ];
                         selectors
                             .map(function (selector) { return Array.from(document.querySelectorAll(selector)); })

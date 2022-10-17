@@ -47,6 +47,7 @@ var fs_1 = require("fs");
 var upath_1 = require("upath");
 var snapshot_1 = require("./snapshot");
 var array_1 = require("./utils/array");
+var env_1 = require("./utils/env");
 var string_1 = require("./utils/string");
 var url_1 = require("./utils/url");
 var pathname = new URL(snapshot_1.pkgJson.homepage).pathname;
@@ -57,6 +58,7 @@ var _debugasset = debug('asset');
 var _debugsnap = debug('snap');
 function ServerSnapshot(options) {
     var _this = this;
+    debug('env')(env_1.isDev ? 'development' : 'production' + ' mode');
     var defaults = {
         source: (0, upath_1.join)(process.cwd(), 'build'),
         dest: (0, upath_1.join)(process.cwd(), 'tmp'),

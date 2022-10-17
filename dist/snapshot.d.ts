@@ -24,6 +24,7 @@ export declare class Snapshot {
      * @returns
      */
     scrape(url: string): Promise<string>;
+    fixCRA1(html: string | ArrayBuffer | DataView): Promise<string>;
     removeUnwantedHtml(html: string | ArrayBuffer | DataView): Promise<string>;
     removeDuplicateScript(html: string | ArrayBuffer | DataView): Promise<string>;
     fixInners(html: string | ArrayBuffer | DataView): Promise<string>;

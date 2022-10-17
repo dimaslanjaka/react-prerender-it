@@ -6,6 +6,7 @@ import { join } from 'upath';
 
 import { pkgJson, save, Snapshot, workspace } from './snapshot';
 import { array_unique } from './utils/array';
+import { isDev } from './utils/env';
 import { escapeRegex } from './utils/string';
 import { fixUrl } from './utils/url';
 
@@ -43,6 +44,7 @@ export interface ServerSnapshotOptions {
 }
 
 export function ServerSnapshot(options: ServerSnapshotOptions) {
+  debug('env')(isDev ? 'development' : 'production' + ' mode');
   const defaults: ServerSnapshotOptions = {
     source: join(process.cwd(), 'build'),
     dest: join(process.cwd(), 'tmp'),

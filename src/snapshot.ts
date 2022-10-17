@@ -7,7 +7,6 @@ import prettier from 'prettier';
 import { launch } from 'puppeteer';
 import { dirname, join, toUnix } from 'upath';
 import prettierOptions from './.prettierrc';
-import { defaultArg } from './puppeteer';
 import pkgTempFile from './temp-package.json';
 import { array_unique } from './utils/array';
 import { isDev } from './utils/env';
@@ -41,7 +40,20 @@ export class Snapshot {
     return await launch({
       headless: true,
       timeout: 3 * 60 * 1000,
-      args: defaultArg
+      args: array_unique([
+        '--user-data-dir=' + join(process.cwd(), 'tmp/puppeteer_profile'),
+        '--no-sandbox',
+        '--disable-setuid-sandbox',
+        '--disable-infobars',
+        '--window-position=0,0',
+        '--ignore-certifcate-errors',
+        '--ignore-certifcate-errors-spki-list',
+        '--ignoreHTTPSErrors=true',
+        '--user-agent="Mozilla/5.0 (Linux; Android 6.0.1; Nexus 5X Build/MMB29P) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/W.X.Y.Z‡ Mobile Safari/537.36 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)"',
+        '--disable-features=site-per-process',
+        '--disable-web-security'
+      ]),
+      userDataDir: join(process.cwd(), 'tmp/puppeteer_profile')
     });
   }
 
@@ -62,7 +74,7 @@ export class Snapshot {
     }
     // set indicator true
     this.scraping = true;
-    // launc browser
+    // launch browser
     const browser = await this.launchBrowser();
     // init result default null
     let result = null as string;
@@ -80,14 +92,15 @@ export class Snapshot {
       const content = await page.content();
       //await page.close();
 
+      result = await this.fixCRA1(result);
       result = await this.removeUnwantedHtml(content);
       result = await this.removeDuplicateScript(result);
       result = await this.fixInners(result);
       result = await this.fixSeoFromHtml(result);
       result = await this.setIdentifierFromHtml(result);
       result = await this.fixCdn(result);
+
       if (isDev) {
-        debug('env')('development mode');
         result = prettier.format(
           result,
           Object.assign(prettierOptions, { parser: 'html' })
@@ -106,6 +119,67 @@ export class Snapshot {
       this.schedule.delete(next);
       this.scrape(next);
     }
+    return result;
+  }
+
+  async fixCRA1(html: string | ArrayBuffer | DataView) {
+    const dom = new JSDOM(html);
+    const window = dom.window;
+    const document = dom.window.document;
+    const basePath = new URL(pkg.homepage).pathname;
+
+    const localScripts = Array.from(document.scripts).filter(
+      (x) => x.src && x.src.startsWith(basePath)
+    );
+    // CRA v1|v2.alpha
+    const mainRegexp = /main\.[\w]{8}.js|main\.[\w]{8}\.chunk\.js/;
+    const mainScript = localScripts.find((x) => mainRegexp.test(x.src));
+    const firstStyle = document.querySelector('style');
+
+    if (!mainScript) return;
+
+    const chunkRegexp = /(\w+)\.[\w]{8}(\.chunk)?\.js/g;
+    const chunkScripts = localScripts.filter((x) => {
+      const matched = chunkRegexp.exec(x.src);
+      // we need to reset state of RegExp https://stackoverflow.com/a/11477448
+      chunkRegexp.lastIndex = 0;
+      return matched && matched[1] !== 'main' && matched[1] !== 'vendors';
+    });
+
+    const mainScripts = localScripts.filter((x) => {
+      const matched = chunkRegexp.exec(x.src);
+      // we need to reset state of RegExp https://stackoverflow.com/a/11477448
+      chunkRegexp.lastIndex = 0;
+      return matched && (matched[1] === 'main' || matched[1] === 'vendors');
+    });
+
+    const createLink = (x: Element) => {
+      const inlineCss = false;
+      const http2PushManifest = false;
+      if (http2PushManifest) return;
+      const linkTag = document.createElement('link');
+      linkTag.setAttribute('rel', 'preload');
+      linkTag.setAttribute('as', 'script');
+      linkTag.setAttribute('href', x.getAttribute('src').replace(basePath, ''));
+      if (inlineCss) {
+        firstStyle.parentNode.insertBefore(linkTag, firstStyle);
+      } else {
+        document.head.appendChild(linkTag);
+      }
+    };
+
+    mainScripts.map((x) => createLink(x));
+    for (let i = chunkScripts.length - 1; i >= 0; --i) {
+      const x = chunkScripts[i];
+      if (x.parentElement && mainScript.parentNode) {
+        x.parentElement.removeChild(x);
+        createLink(x);
+      }
+    }
+
+    const result = await this.serializeHtml(dom).finally(() => {
+      window.close();
+    });
     return result;
   }
 
@@ -134,8 +208,11 @@ export class Snapshot {
       // auto generated adsense
       '.adsbygoogle-noablate',
       // auto generated adsense
-      'iframe[src*="tpc.googlesyndication.com"]'
-      //'script[src*="main."]',
+      'iframe[src*="tpc.googlesyndication.com"]',
+      // auto generated disqus
+      'link[href="https://disqus.com/next/config.js"]',
+      // auto generated disqus
+      'script[src*=".disqus.com/recommendations.js"]'
     ];
     selectors
       .map((selector) => Array.from(document.querySelectorAll(selector)))
