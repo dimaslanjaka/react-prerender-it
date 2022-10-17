@@ -291,6 +291,7 @@ var fixWebpackChunksIssue1 = function (_a) {
         var mainRegexp = /main\.[\w]{8}.js|main\.[\w]{8}\.chunk\.js/;
         var mainScript = localScripts.find(function (x) { return mainRegexp.test(x.src); });
         var firstStyle = document.querySelector('style');
+        console.log({ localScripts: localScripts, mainScript: mainScript });
         if (!mainScript)
             return;
         var chunkRegexp = /(\w+)\.[\w]{8}(\.chunk)?\.js/g;

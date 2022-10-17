@@ -88,26 +88,37 @@ export class Snapshot {
       const page = await browser.newPage();
       // set do not track
       page.setExtraHTTPHeaders({ DNT: '1' });
+      // apply request interception https://github.com/puppeteer/puppeteer/issues/5287#issuecomment-572005871
+      await page.setRequestInterception(true);
       // listen error
       page.on('pageerror', function (e) {
         debug('error')('page error', e.message);
         browser.close();
       });
       // listen request
-      /*page.on('request', (request) => {
+      page.on('request', (request) => {
         const url = request.url();
-        debug('request')('request', url);
+
         let continueRequest = true;
-        // look for tracking script
-        if (url.match(/google-analytics\.com/gi)) {
+        const disabledResources = [
+          // disable adsense
+          /pagead2\.googlesyndication\.com/gi,
+          // disable google analytics
+          /googletagmanager\.com/gi,
+          // disable google analytics
+          /google-analytics\.com/gi
+        ];
+        // disable matched resources
+        if (disabledResources.some((regex) => regex.test(url))) {
           continueRequest = false;
         }
         if (!continueRequest) {
           request.abort();
         } else {
+          debug('request')(request.resourceType(), url);
           request.continue();
         }
-      });*/
+      });
       await page.goto(url, {
         waitUntil: 'networkidle0',
         timeout: 3 * 60 * 1000
@@ -121,14 +132,14 @@ export class Snapshot {
         page
       });
       const content = await page.content();
-      //await page.close();
 
-      result = await this.removeUnwantedHtml(content);
-      result = await this.removeDuplicateScript(result);
-      result = await this.fixInners(result);
-      result = await this.fixSeoFromHtml(result);
-      result = await this.setIdentifierFromHtml(result);
-      result = await this.fixCdn(result);
+      result = content;
+      //result = await this.removeUnwantedHtml(result);
+      //result = await this.removeDuplicateScript(result);
+      //result = await this.fixInners(result);
+      //result = await this.fixSeoFromHtml(result);
+      //result = await this.setIdentifierFromHtml(result);
+      //result = await this.fixCdn(result);
 
       if (isDev) {
         result = prettier.format(

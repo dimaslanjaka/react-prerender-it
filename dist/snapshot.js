@@ -128,100 +128,87 @@ var Snapshot = /** @class */ (function () {
                         result = null;
                         _b.label = 2;
                     case 2:
-                        _b.trys.push([2, 16, , 17]);
+                        _b.trys.push([2, 11, , 12]);
                         return [4 /*yield*/, browser.newPage()];
                     case 3:
                         page = _b.sent();
                         // set do not track
                         page.setExtraHTTPHeaders({ DNT: '1' });
+                        // apply request interception https://github.com/puppeteer/puppeteer/issues/5287#issuecomment-572005871
+                        return [4 /*yield*/, page.setRequestInterception(true)];
+                    case 4:
+                        // apply request interception https://github.com/puppeteer/puppeteer/issues/5287#issuecomment-572005871
+                        _b.sent();
                         // listen error
                         page.on('pageerror', function (e) {
                             debug('error')('page error', e.message);
                             browser.close();
                         });
                         // listen request
-                        /*page.on('request', (request) => {
-                          const url = request.url();
-                          debug('request')('request', url);
-                          let continueRequest = true;
-                          // look for tracking script
-                          if (url.match(/google-analytics\.com/gi)) {
-                            continueRequest = false;
-                          }
-                          if (!continueRequest) {
-                            request.abort();
-                          } else {
-                            request.continue();
-                          }
-                        });*/
+                        page.on('request', function (request) {
+                            var url = request.url();
+                            var continueRequest = true;
+                            var disabledResources = [
+                                // disable adsense
+                                /pagead2\.googlesyndication\.com/gi,
+                                // disable google analytics
+                                /googletagmanager\.com/gi,
+                                // disable google analytics
+                                /google-analytics\.com/gi
+                            ];
+                            // disable matched resources
+                            if (disabledResources.some(function (regex) { return regex.test(url); })) {
+                                continueRequest = false;
+                            }
+                            if (!continueRequest) {
+                                request.abort();
+                            }
+                            else {
+                                debug('request')(request.resourceType(), url);
+                                request["continue"]();
+                            }
+                        });
                         return [4 /*yield*/, page.goto(url, {
                                 waitUntil: 'networkidle0',
                                 timeout: 3 * 60 * 1000
                             })];
-                    case 4:
-                        // listen request
-                        /*page.on('request', (request) => {
-                          const url = request.url();
-                          debug('request')('request', url);
-                          let continueRequest = true;
-                          // look for tracking script
-                          if (url.match(/google-analytics\.com/gi)) {
-                            continueRequest = false;
-                          }
-                          if (!continueRequest) {
-                            request.abort();
-                          } else {
-                            request.continue();
-                          }
-                        });*/
+                    case 5:
                         _b.sent();
                         return [4 /*yield*/, page.waitForNetworkIdle()];
-                    case 5:
+                    case 6:
                         _b.sent();
                         (0, snapshot_utils_1.preloadResources)({ page: page, basePath: new URL(pkg.homepage).pathname });
                         return [4 /*yield*/, (0, snapshot_utils_1.fixInsertRule)({ page: page })];
-                    case 6:
+                    case 7:
                         _b.sent();
                         return [4 /*yield*/, (0, snapshot_utils_1.fixFormFields)({ page: page })];
-                    case 7:
+                    case 8:
                         _b.sent();
                         return [4 /*yield*/, (0, snapshot_utils_1.fixWebpackChunksIssue1)({
                                 basePath: new URL(pkg.homepage).pathname,
                                 page: page
                             })];
-                    case 8:
+                    case 9:
                         _b.sent();
                         return [4 /*yield*/, page.content()];
-                    case 9:
-                        content = _b.sent();
-                        return [4 /*yield*/, this.removeUnwantedHtml(content)];
                     case 10:
-                        //await page.close();
-                        result = _b.sent();
-                        return [4 /*yield*/, this.removeDuplicateScript(result)];
-                    case 11:
-                        result = _b.sent();
-                        return [4 /*yield*/, this.fixInners(result)];
-                    case 12:
-                        result = _b.sent();
-                        return [4 /*yield*/, this.fixSeoFromHtml(result)];
-                    case 13:
-                        result = _b.sent();
-                        return [4 /*yield*/, this.setIdentifierFromHtml(result)];
-                    case 14:
-                        result = _b.sent();
-                        return [4 /*yield*/, this.fixCdn(result)];
-                    case 15:
-                        result = _b.sent();
+                        content = _b.sent();
+                        result = content;
+                        //result = await this.removeUnwantedHtml(result);
+                        //result = await this.removeDuplicateScript(result);
+                        //result = await this.fixInners(result);
+                        //result = await this.fixSeoFromHtml(result);
+                        //result = await this.setIdentifierFromHtml(result);
+                        //result = await this.fixCdn(result);
                         if (env_1.isDev) {
                             result = prettier_1["default"].format(result, Object.assign(_prettierrc_1["default"], { parser: 'html' }));
                         }
-                        return [3 /*break*/, 17];
-                    case 16:
+                        return [3 /*break*/, 12];
+                    case 11:
                         _a = _b.sent();
-                        return [3 /*break*/, 17];
-                    case 17: return [4 /*yield*/, browser.close()];
-                    case 18:
+                        return [3 /*break*/, 12];
+                    case 12: return [4 /*yield*/, browser.close()];
+                    case 13:
                         _b.sent();
                         this.scraped.add(url);
                         // set indicator false
