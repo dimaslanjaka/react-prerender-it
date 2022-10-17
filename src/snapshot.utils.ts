@@ -293,14 +293,19 @@ export const fixWebpackChunksIssue1 = ({
   return page.evaluate(
     (basePath, http2PushManifest, inlineCss) => {
       const localScripts = Array.from(document.scripts).filter(
-        (x) => x.src && x.src.startsWith(basePath)
+        ({ src, hasAttribute }) => {
+          const hasSrc = hasAttribute('src');
+          const startWithBase = src.startsWith(basePath);
+          const startWithOrigin = src.startsWith(location.origin);
+          console.log({ src, startWithOrigin });
+          return hasSrc && (startWithBase || startWithOrigin);
+        }
       );
+
       // CRA v1|v2.alpha
       const mainRegexp = /main\.[\w]{8}.js|main\.[\w]{8}\.chunk\.js/;
       const mainScript = localScripts.find((x) => mainRegexp.test(x.src));
       const firstStyle = document.querySelector('style');
-
-      console.log({ basePath, total: localScripts.length });
 
       if (!mainScript) return;
 

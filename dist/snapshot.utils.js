@@ -340,12 +340,18 @@ exports.setid = setid;
 var fixWebpackChunksIssue1 = function (_a) {
     var page = _a.page, basePath = _a.basePath, _b = _a.http2PushManifest, http2PushManifest = _b === void 0 ? false : _b, _c = _a.inlineCss, inlineCss = _c === void 0 ? false : _c;
     return page.evaluate(function (basePath, http2PushManifest, inlineCss) {
-        var localScripts = Array.from(document.scripts).filter(function (x) { return x.src && x.src.startsWith(basePath); });
+        var localScripts = Array.from(document.scripts).filter(function (_a) {
+            var src = _a.src, hasAttribute = _a.hasAttribute;
+            var hasSrc = hasAttribute('src');
+            var startWithBase = src.startsWith(basePath);
+            var startWithOrigin = src.startsWith(location.origin);
+            console.log({ src: src, startWithOrigin: startWithOrigin });
+            return hasSrc && (startWithBase || startWithOrigin);
+        });
         // CRA v1|v2.alpha
         var mainRegexp = /main\.[\w]{8}.js|main\.[\w]{8}\.chunk\.js/;
         var mainScript = localScripts.find(function (x) { return mainRegexp.test(x.src); });
         var firstStyle = document.querySelector('style');
-        console.log({ basePath: basePath, total: localScripts.length });
         if (!mainScript)
             return;
         var chunkRegexp = /(\w+)\.[\w]{8}(\.chunk)?\.js/g;
