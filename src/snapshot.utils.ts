@@ -300,6 +300,8 @@ export const fixWebpackChunksIssue1 = ({
       const mainScript = localScripts.find((x) => mainRegexp.test(x.src));
       const firstStyle = document.querySelector('style');
 
+      console.log({ basePath, total: localScripts.length });
+
       if (!mainScript) return;
 
       const chunkRegexp = /(\w+)\.[\w]{8}(\.chunk)?\.js/g;
