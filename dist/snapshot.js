@@ -131,9 +131,28 @@ var Snapshot = /** @class */ (function () {
                         return [4 /*yield*/, browser.newPage()];
                     case 3:
                         page = _b.sent();
+                        // set do not track
+                        page.setExtraHTTPHeaders({ DNT: '1' });
+                        // listen error
                         page.on('pageerror', function (e) {
                             debug('error')('page error', e.message);
                             browser.close();
+                        });
+                        // listen request
+                        page.on('request', function (request) {
+                            var url = request.url();
+                            debug('request')('request', url);
+                            var continueRequest = true;
+                            // look for tracking script
+                            if (url.match(/google-analytics\.com/gi)) {
+                                continueRequest = false;
+                            }
+                            if (!continueRequest) {
+                                request.abort();
+                            }
+                            else {
+                                request["continue"]();
+                            }
                         });
                         return [4 /*yield*/, page.goto(url, {
                                 waitUntil: 'networkidle0',

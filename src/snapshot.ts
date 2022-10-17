@@ -80,9 +80,27 @@ export class Snapshot {
     let result = null as string;
     try {
       const page = await browser.newPage();
+      // set do not track
+      page.setExtraHTTPHeaders({ DNT: '1' });
+      // listen error
       page.on('pageerror', function (e) {
         debug('error')('page error', e.message);
         browser.close();
+      });
+      // listen request
+      page.on('request', (request) => {
+        const url = request.url();
+        debug('request')('request', url);
+        let continueRequest = true;
+        // look for tracking script
+        if (url.match(/google-analytics\.com/gi)) {
+          continueRequest = false;
+        }
+        if (!continueRequest) {
+          request.abort();
+        } else {
+          request.continue();
+        }
       });
       await page.goto(url, {
         waitUntil: 'networkidle0',
