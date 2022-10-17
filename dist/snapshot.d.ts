@@ -34,6 +34,12 @@ export declare class Snapshot {
     static isPathNonHtml(str: string): boolean;
     static isPathHasExt(str: string): boolean;
 }
+/**
+ * save file recursive
+ * @param file
+ * @param content
+ * @returns
+ */
 export declare function save(file: string, content: string): Bluebird<string>;
 /**
  * Remove cwd

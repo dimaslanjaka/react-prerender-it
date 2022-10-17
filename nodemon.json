@@ -1,6 +1,7 @@
 {
   "$schema": "http://json.schemastore.org/nodemon",
-  "exec": "cross-env NODE_ENV=development DEBUG=prerender-it* run-s build test-build test",
+  "exec": "cross-env NODE_ENV=development DEBUG=prerender-it* run-s build test",
+  "exec2": "cross-env NODE_ENV=development DEBUG=prerender-it* run-s build test-build test",
   "watch": [
     "./src/*.ts"
   ],

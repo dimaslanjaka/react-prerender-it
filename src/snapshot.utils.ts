@@ -3,7 +3,6 @@
 import { existsSync, mkdirSync } from 'fs';
 import { Page } from 'puppeteer';
 import { dirname } from 'upath';
-import { array_unique } from './utils/array';
 
 const defaultOptions = {
   //# stable configurations
@@ -219,42 +218,32 @@ export const fixFormFields = ({ page }: ParamFix) => {
   });
 };
 
-export const captureHyperlinks = ({ page }: ParamFix): Promise<string[]> => {
-  return new Promise((resolve) => {
-    const collectedLinks = new Set<string>();
-    page
-      .evaluate(() => {
-        // get internal links
-        const anchors = Array.from(document.querySelectorAll('a'));
-        const internal_links = array_unique(
-          anchors
-            .filter(
-              (a) =>
-                a.href.startsWith('/') &&
-                !/.(jpeg|jpg|gif|svg|ico|png)$/i.test(a.href)
-            )
-            .map((a) => a.href)
-            .filter(
-              (href) =>
-                typeof href === 'string' &&
-                href.startsWith('/') &&
-                !/.(jpeg|jpg|gif|svg|ico|png)$/i.test(href) &&
-                href.length > 0
-            )
-        ).filter(
-          (str) =>
-            typeof str === 'string' &&
-            str.length > 0 &&
-            !str.startsWith('/undefined')
-        );
-        internal_links.forEach((item) => {
-          if (item.trim().length > 0) collectedLinks.add(item);
-        });
-      })
-      .then(() => {
-        resolve(Array.from(collectedLinks.values()));
-      });
+// not working
+export const captureHyperlinks = async ({ page }: ParamFix) => {
+  const collectedLinks = new Set<string>();
+  await page.evaluate(() => {
+    // get internal links
+    const anchors = Array.from(document.querySelectorAll('a'));
+    const internal_links = anchors
+      .filter(
+        (a) =>
+          a.href.startsWith('/') &&
+          !/.(jpeg|jpg|gif|svg|ico|png)$/i.test(a.href)
+      )
+      .map((a) => a.href)
+      .filter(
+        (href) =>
+          typeof href === 'string' &&
+          href.startsWith('/') &&
+          !/.(jpeg|jpg|gif|svg|ico|png)$/i.test(href) &&
+          href.length > 0
+      )
+      .filter((str) => typeof str === 'string' && str.trim().length > 0);
+    internal_links.forEach((item) => {
+      if (item.trim().length > 0) collectedLinks.add(item);
+    });
   });
+  return collectedLinks;
 };
 
 interface ScreenshotParam {

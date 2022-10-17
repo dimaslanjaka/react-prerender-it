@@ -105,7 +105,7 @@ var Snapshot = /** @class */ (function () {
      */
     Snapshot.prototype.scrape = function (url) {
         return __awaiter(this, void 0, void 0, function () {
-            var browser, result, page, urls, content, _a, next;
+            var browser, result, page, content, _a, next;
             return __generator(this, function (_b) {
                 switch (_b.label) {
                     case 0:
@@ -127,7 +127,7 @@ var Snapshot = /** @class */ (function () {
                         result = null;
                         _b.label = 2;
                     case 2:
-                        _b.trys.push([2, 12, , 13]);
+                        _b.trys.push([2, 14, , 15]);
                         return [4 /*yield*/, browser.newPage()];
                     case 3:
                         page = _b.sent();
@@ -153,12 +153,15 @@ var Snapshot = /** @class */ (function () {
                                 // disable google analytics
                                 /googletagmanager\.com/gi,
                                 // disable google analytics
-                                /google-analytics\.com/gi
+                                /google-analytics\.com/gi,
+                                // disable disqus
+                                /\.disqus\.com\/embed\.js/gi
                             ];
                             // disable matched resources
-                            if (disabledResources.some(function (regex) { return regex.test(url); })) {
-                                continueRequest = false;
-                            }
+                            if (request.resourceType() === 'script')
+                                if (disabledResources.some(function (regex) { return regex.test(url); })) {
+                                    continueRequest = false;
+                                }
                             if (!continueRequest) {
                                 debug('request')('abort', request.resourceType(), url);
                                 request.abort();
@@ -193,30 +196,31 @@ var Snapshot = /** @class */ (function () {
                             })];
                     case 9:
                         _b.sent();
-                        return [4 /*yield*/, (0, snapshot_utils_1.captureHyperlinks)({ page: page })];
-                    case 10:
-                        urls = _b.sent();
-                        //urls.forEach((item) => this.links.add(item));
-                        console.log(urls);
                         return [4 /*yield*/, page.content()];
-                    case 11:
+                    case 10:
                         content = _b.sent();
                         result = content;
+                        return [4 /*yield*/, this.removeDuplicateScript(result)];
+                    case 11:
                         //result = await this.removeUnwantedHtml(result);
-                        //result = await this.removeDuplicateScript(result);
-                        //result = await this.fixInners(result);
-                        //result = await this.fixSeoFromHtml(result);
+                        result = _b.sent();
+                        return [4 /*yield*/, this.fixInners(result)];
+                    case 12:
+                        result = _b.sent();
+                        return [4 /*yield*/, this.fixSeoFromHtml(result)];
+                    case 13:
+                        result = _b.sent();
                         //result = await this.setIdentifierFromHtml(result);
                         //result = await this.fixCdn(result);
                         if (env_1.isDev) {
                             result = prettier_1["default"].format(result, Object.assign(_prettierrc_1["default"], { parser: 'html' }));
                         }
-                        return [3 /*break*/, 13];
-                    case 12:
-                        _a = _b.sent();
-                        return [3 /*break*/, 13];
-                    case 13: return [4 /*yield*/, browser.close()];
+                        return [3 /*break*/, 15];
                     case 14:
+                        _a = _b.sent();
+                        return [3 /*break*/, 15];
+                    case 15: return [4 /*yield*/, browser.close()];
+                    case 16:
                         _b.sent();
                         this.scraped.add(url);
                         // set indicator false
@@ -481,6 +485,12 @@ var Snapshot = /** @class */ (function () {
     return Snapshot;
 }());
 exports.Snapshot = Snapshot;
+/**
+ * save file recursive
+ * @param file
+ * @param content
+ * @returns
+ */
 function save(file, content) {
     return new bluebird_1["default"](function (resolve) {
         if (!(0, fs_1.existsSync)((0, upath_1.dirname)(file)))

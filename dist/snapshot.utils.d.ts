@@ -27,7 +27,7 @@ export declare const fixInsertRule: ({ page }: ParamFix) => Promise<void>;
  * @returns
  */
 export declare const fixFormFields: ({ page }: ParamFix) => Promise<void>;
-export declare const captureHyperlinks: ({ page }: ParamFix) => Promise<string[]>;
+export declare const captureHyperlinks: ({ page }: ParamFix) => Promise<Set<string>>;
 interface ScreenshotParam {
     page: Page;
     filePath: string;

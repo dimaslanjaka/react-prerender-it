@@ -8,7 +8,6 @@ import { launch } from 'puppeteer';
 import { dirname, join, toUnix } from 'upath';
 import prettierOptions from './.prettierrc';
 import {
-  captureHyperlinks,
   fixFormFields,
   fixInsertRule,
   fixWebpackChunksIssue1,
@@ -107,12 +106,15 @@ export class Snapshot {
           // disable google analytics
           /googletagmanager\.com/gi,
           // disable google analytics
-          /google-analytics\.com/gi
+          /google-analytics\.com/gi,
+          // disable disqus
+          /\.disqus\.com\/embed\.js/gi
         ];
         // disable matched resources
-        if (disabledResources.some((regex) => regex.test(url))) {
-          continueRequest = false;
-        }
+        if (request.resourceType() === 'script')
+          if (disabledResources.some((regex) => regex.test(url))) {
+            continueRequest = false;
+          }
         if (!continueRequest) {
           debug('request')('abort', request.resourceType(), url);
           request.abort();
@@ -136,17 +138,13 @@ export class Snapshot {
         basePath: new URL(pkg.homepage).pathname,
         page
       });
-      // get internal links
-      const urls = await captureHyperlinks({ page });
-      //urls.forEach((item) => this.links.add(item));
-      console.log(urls);
       const content = await page.content();
 
       result = content;
       //result = await this.removeUnwantedHtml(result);
-      //result = await this.removeDuplicateScript(result);
-      //result = await this.fixInners(result);
-      //result = await this.fixSeoFromHtml(result);
+      result = await this.removeDuplicateScript(result);
+      result = await this.fixInners(result);
+      result = await this.fixSeoFromHtml(result);
       //result = await this.setIdentifierFromHtml(result);
       //result = await this.fixCdn(result);
 
@@ -399,6 +397,12 @@ export class Snapshot {
   }
 }
 
+/**
+ * save file recursive
+ * @param file
+ * @param content
+ * @returns
+ */
 export function save(file: string, content: string) {
   return new Bluebird((resolve: (file: string) => any) => {
     if (!existsSync(dirname(file)))

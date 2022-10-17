@@ -40,7 +40,6 @@ exports.__esModule = true;
 exports.fixParcelChunksIssue = exports.fixWebpackChunksIssue2 = exports.fixWebpackChunksIssue1 = exports.saveAsPng = exports.captureHyperlinks = exports.fixFormFields = exports.fixInsertRule = exports.removeBlobs = exports.preloadResources = void 0;
 var fs_1 = require("fs");
 var upath_1 = require("upath");
-var array_1 = require("./utils/array");
 var defaultOptions = {
     //# stable configurations
     port: 45678,
@@ -267,37 +266,40 @@ var fixFormFields = function (_a) {
     });
 };
 exports.fixFormFields = fixFormFields;
+// not working
 var captureHyperlinks = function (_a) {
     var page = _a.page;
-    return new Promise(function (resolve) {
-        var collectedLinks = new Set();
-        page
-            .evaluate(function () {
-            // get internal links
-            var anchors = Array.from(document.querySelectorAll('a'));
-            var internal_links = (0, array_1.array_unique)(anchors
-                .filter(function (a) {
-                return a.href.startsWith('/') &&
-                    !/.(jpeg|jpg|gif|svg|ico|png)$/i.test(a.href);
-            })
-                .map(function (a) { return a.href; })
-                .filter(function (href) {
-                return typeof href === 'string' &&
-                    href.startsWith('/') &&
-                    !/.(jpeg|jpg|gif|svg|ico|png)$/i.test(href) &&
-                    href.length > 0;
-            })).filter(function (str) {
-                return typeof str === 'string' &&
-                    str.length > 0 &&
-                    !str.startsWith('/undefined');
-            });
-            internal_links.forEach(function (item) {
-                if (item.trim().length > 0)
-                    collectedLinks.add(item);
-            });
-        })
-            .then(function () {
-            resolve(Array.from(collectedLinks.values()));
+    return __awaiter(void 0, void 0, void 0, function () {
+        var collectedLinks;
+        return __generator(this, function (_b) {
+            switch (_b.label) {
+                case 0:
+                    collectedLinks = new Set();
+                    return [4 /*yield*/, page.evaluate(function () {
+                            // get internal links
+                            var anchors = Array.from(document.querySelectorAll('a'));
+                            var internal_links = anchors
+                                .filter(function (a) {
+                                return a.href.startsWith('/') &&
+                                    !/.(jpeg|jpg|gif|svg|ico|png)$/i.test(a.href);
+                            })
+                                .map(function (a) { return a.href; })
+                                .filter(function (href) {
+                                return typeof href === 'string' &&
+                                    href.startsWith('/') &&
+                                    !/.(jpeg|jpg|gif|svg|ico|png)$/i.test(href) &&
+                                    href.length > 0;
+                            })
+                                .filter(function (str) { return typeof str === 'string' && str.trim().length > 0; });
+                            internal_links.forEach(function (item) {
+                                if (item.trim().length > 0)
+                                    collectedLinks.add(item);
+                            });
+                        })];
+                case 1:
+                    _b.sent();
+                    return [2 /*return*/, collectedLinks];
+            }
         });
     });
 };
