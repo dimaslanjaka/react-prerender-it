@@ -1,6 +1,6 @@
 # Prerender React
 
-Generate static files from React production
+Generate static files from React production, inspired from `react-snap`.
 
 ## Features
 - Support React v18 Hydration
@@ -9,6 +9,7 @@ Generate static files from React production
 - Remove duplicate sources from generated html
 - Auto crawl internal links
 - ~~Auto SEO external links~~
+- Latest Dependencies
 
 ## Usage
 ```js

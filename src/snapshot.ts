@@ -8,6 +8,7 @@ import { launch } from 'puppeteer';
 import { dirname, join, toUnix } from 'upath';
 import prettierOptions from './.prettierrc';
 import {
+  captureHyperlinks,
   fixFormFields,
   fixInsertRule,
   fixWebpackChunksIssue1,
@@ -113,9 +114,12 @@ export class Snapshot {
           continueRequest = false;
         }
         if (!continueRequest) {
+          debug('request')('abort', request.resourceType(), url);
           request.abort();
         } else {
-          debug('request')(request.resourceType(), url);
+          /*if (request.resourceType() !== 'document') {
+            debug('request')(request.resourceType(), url);
+          }*/
           request.continue();
         }
       });
@@ -124,6 +128,7 @@ export class Snapshot {
         timeout: 3 * 60 * 1000
       });
       await page.waitForNetworkIdle();
+      // preload resources
       preloadResources({ page, basePath: new URL(pkg.homepage).pathname });
       await fixInsertRule({ page });
       await fixFormFields({ page });
@@ -131,6 +136,10 @@ export class Snapshot {
         basePath: new URL(pkg.homepage).pathname,
         page
       });
+      // get internal links
+      const urls = await captureHyperlinks({ page });
+      urls.forEach((item) => this.links.add(item));
+      console.log(urls);
       const content = await page.content();
 
       result = content;

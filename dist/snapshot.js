@@ -106,7 +106,8 @@ var Snapshot = /** @class */ (function () {
      */
     Snapshot.prototype.scrape = function (url) {
         return __awaiter(this, void 0, void 0, function () {
-            var browser, result, page, content, _a, next;
+            var browser, result, page, urls, content, _a, next;
+            var _this = this;
             return __generator(this, function (_b) {
                 switch (_b.label) {
                     case 0:
@@ -128,7 +129,7 @@ var Snapshot = /** @class */ (function () {
                         result = null;
                         _b.label = 2;
                     case 2:
-                        _b.trys.push([2, 11, , 12]);
+                        _b.trys.push([2, 12, , 13]);
                         return [4 /*yield*/, browser.newPage()];
                     case 3:
                         page = _b.sent();
@@ -161,10 +162,13 @@ var Snapshot = /** @class */ (function () {
                                 continueRequest = false;
                             }
                             if (!continueRequest) {
+                                debug('request')('abort', request.resourceType(), url);
                                 request.abort();
                             }
                             else {
-                                debug('request')(request.resourceType(), url);
+                                /*if (request.resourceType() !== 'document') {
+                                  debug('request')(request.resourceType(), url);
+                                }*/
                                 request["continue"]();
                             }
                         });
@@ -177,6 +181,7 @@ var Snapshot = /** @class */ (function () {
                         return [4 /*yield*/, page.waitForNetworkIdle()];
                     case 6:
                         _b.sent();
+                        // preload resources
                         (0, snapshot_utils_1.preloadResources)({ page: page, basePath: new URL(pkg.homepage).pathname });
                         return [4 /*yield*/, (0, snapshot_utils_1.fixInsertRule)({ page: page })];
                     case 7:
@@ -190,8 +195,13 @@ var Snapshot = /** @class */ (function () {
                             })];
                     case 9:
                         _b.sent();
-                        return [4 /*yield*/, page.content()];
+                        return [4 /*yield*/, (0, snapshot_utils_1.captureHyperlinks)({ page: page })];
                     case 10:
+                        urls = _b.sent();
+                        urls.forEach(function (item) { return _this.links.add(item); });
+                        console.log(urls);
+                        return [4 /*yield*/, page.content()];
+                    case 11:
                         content = _b.sent();
                         result = content;
                         //result = await this.removeUnwantedHtml(result);
@@ -203,12 +213,12 @@ var Snapshot = /** @class */ (function () {
                         if (env_1.isDev) {
                             result = prettier_1["default"].format(result, Object.assign(_prettierrc_1["default"], { parser: 'html' }));
                         }
-                        return [3 /*break*/, 12];
-                    case 11:
+                        return [3 /*break*/, 13];
+                    case 12:
                         _a = _b.sent();
-                        return [3 /*break*/, 12];
-                    case 12: return [4 /*yield*/, browser.close()];
-                    case 13:
+                        return [3 /*break*/, 13];
+                    case 13: return [4 /*yield*/, browser.close()];
+                    case 14:
                         _b.sent();
                         this.scraped.add(url);
                         // set indicator false

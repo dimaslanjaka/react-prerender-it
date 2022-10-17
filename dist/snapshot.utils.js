@@ -37,9 +37,10 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 exports.__esModule = true;
-exports.fixParcelChunksIssue = exports.fixWebpackChunksIssue2 = exports.fixWebpackChunksIssue1 = exports.saveAsPng = exports.fixFormFields = exports.fixInsertRule = exports.removeBlobs = exports.preloadResources = void 0;
+exports.fixParcelChunksIssue = exports.fixWebpackChunksIssue2 = exports.fixWebpackChunksIssue1 = exports.saveAsPng = exports.captureHyperlinks = exports.fixFormFields = exports.fixInsertRule = exports.removeBlobs = exports.preloadResources = void 0;
 var fs_1 = require("fs");
 var upath_1 = require("upath");
+var array_1 = require("./utils/array");
 var defaultOptions = {
     //# stable configurations
     port: 45678,
@@ -266,6 +267,38 @@ var fixFormFields = function (_a) {
     });
 };
 exports.fixFormFields = fixFormFields;
+var captureHyperlinks = function (_a) {
+    var page = _a.page;
+    var links = new Set();
+    return new Promise(function (resolve) {
+        page.evaluate(function () {
+            // get internal links
+            var anchors = Array.from(document.querySelectorAll('a'));
+            var internal_links = (0, array_1.array_unique)(anchors
+                .filter(function (a) {
+                return a.href.startsWith('/') &&
+                    !/.(jpeg|jpg|gif|svg|ico|png)$/i.test(a.href);
+            })
+                .map(function (a) { return a.href; })
+                .filter(function (href) {
+                return typeof href === 'string' &&
+                    href.startsWith('/') &&
+                    !/.(jpeg|jpg|gif|svg|ico|png)$/i.test(href) &&
+                    href.length > 0;
+            })).filter(function (str) {
+                return typeof str === 'string' &&
+                    str.length > 0 &&
+                    !str.startsWith('/undefined');
+            });
+            internal_links.forEach(function (item) {
+                if (item.trim().length > 0)
+                    links.add(item);
+            });
+            resolve(Array.from(links.values()));
+        });
+    });
+};
+exports.captureHyperlinks = captureHyperlinks;
 var saveAsPng = function (_a) {
     var page = _a.page, filePath = _a.filePath, route = _a.route;
     if (!(0, fs_1.existsSync)((0, upath_1.dirname)(filePath)))
