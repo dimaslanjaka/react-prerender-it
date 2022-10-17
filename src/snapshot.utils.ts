@@ -297,7 +297,6 @@ export const fixWebpackChunksIssue1 = ({
         const hasSrc = el.hasAttribute('src') && src.trim().length > 0;
         const startWithBase = src.startsWith(basePath);
         const startWithOrigin = src.startsWith(location.origin);
-        console.log({ src, startWithOrigin });
         return hasSrc && (startWithBase || startWithOrigin);
       });
 
@@ -306,9 +305,9 @@ export const fixWebpackChunksIssue1 = ({
       const mainScript = localScripts.find((x) => mainRegexp.test(x.src));
       const firstStyle = document.querySelector('style');
 
-      console.log({ mainScript });
-
       if (!mainScript) return;
+
+      // console.log('main script', mainScript.src);
 
       const chunkRegexp = /(\w+)\.[\w]{8}(\.chunk)?\.js/g;
       const chunkScripts = localScripts.filter((x) => {
@@ -364,9 +363,14 @@ export const fixWebpackChunksIssue2 = ({
 }: FixChunksOptions) => {
   return page.evaluate(
     (basePath, http2PushManifest, inlineCss) => {
-      const localScripts = Array.from(document.scripts).filter(
-        (x) => x.src && x.src.startsWith(basePath)
-      );
+      const localScripts = Array.from(document.scripts).filter(function (el) {
+        const src = el.src;
+        const hasSrc = el.hasAttribute('src') && src.trim().length > 0;
+        const startWithBase = src.startsWith(basePath);
+        const startWithOrigin = src.startsWith(location.origin);
+        return hasSrc && (startWithBase || startWithOrigin);
+      });
+
       // CRA v2
       const mainRegexp = /main\.[\w]{8}\.chunk\.js/;
       const mainScript = localScripts.find((x) => mainRegexp.test(x.src));
@@ -440,9 +444,13 @@ export const fixParcelChunksIssue = ({
 }: FixChunksOptions) => {
   return page.evaluate(
     (basePath, http2PushManifest, inlineCss) => {
-      const localScripts = Array.from(document.scripts).filter(
-        (x) => x.src && x.src.startsWith(basePath)
-      );
+      const localScripts = Array.from(document.scripts).filter(function (el) {
+        const src = el.src;
+        const hasSrc = el.hasAttribute('src') && src.trim().length > 0;
+        const startWithBase = src.startsWith(basePath);
+        const startWithOrigin = src.startsWith(location.origin);
+        return hasSrc && (startWithBase || startWithOrigin);
+      });
 
       const mainRegexp = /main\.[\w]{8}\.js/;
       const mainScript = localScripts.find((x) => mainRegexp.test(x.src));
