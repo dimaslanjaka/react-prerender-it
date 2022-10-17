@@ -61,7 +61,6 @@ save(tempPkg, JSON.stringify(pkg));
 exports.pkgJson = pkg;
 var Snapshot = /** @class */ (function () {
     function Snapshot() {
-        this.links = new Set();
         this.scraping = false;
         /**
          * scrape url schedule list
@@ -107,7 +106,6 @@ var Snapshot = /** @class */ (function () {
     Snapshot.prototype.scrape = function (url) {
         return __awaiter(this, void 0, void 0, function () {
             var browser, result, page, urls, content, _a, next;
-            var _this = this;
             return __generator(this, function (_b) {
                 switch (_b.label) {
                     case 0:
@@ -198,7 +196,7 @@ var Snapshot = /** @class */ (function () {
                         return [4 /*yield*/, (0, snapshot_utils_1.captureHyperlinks)({ page: page })];
                     case 10:
                         urls = _b.sent();
-                        urls.forEach(function (item) { return _this.links.add(item); });
+                        //urls.forEach((item) => this.links.add(item));
                         console.log(urls);
                         return [4 /*yield*/, page.content()];
                     case 11:
@@ -398,7 +396,6 @@ var Snapshot = /** @class */ (function () {
     Snapshot.prototype.fixSeoFromHtml = function (html) {
         return __awaiter(this, void 0, void 0, function () {
             var dom, window, document, anchors, internal_links, result;
-            var _this = this;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
@@ -424,7 +421,7 @@ var Snapshot = /** @class */ (function () {
                         });
                         internal_links.forEach(function (item) {
                             if (item.trim().length > 0)
-                                _this.links.add(item);
+                                Snapshot.links.add(item);
                         });
                         return [4 /*yield*/, this.serializeHtml(dom)["finally"](function () {
                                 window.close();
@@ -480,6 +477,7 @@ var Snapshot = /** @class */ (function () {
             return false;
         return /\.\w+$/.test(str);
     };
+    Snapshot.links = new Set();
     return Snapshot;
 }());
 exports.Snapshot = Snapshot;

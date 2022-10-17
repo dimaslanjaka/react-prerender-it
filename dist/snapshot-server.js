@@ -193,7 +193,7 @@ function ServerSnapshot(options) {
                     if (options.autoRoutes) {
                         // auto crawl internal links merge
                         crawlRoutes = (0, array_1.array_unique)(crawlRoutes
-                            .concat(Array.from(snap.links.values()))
+                            .concat(Array.from(snapshot_1.Snapshot.links.values()))
                             // trim all links
                             .map(function (path) { return path.trim(); })
                             // filter undefined and null

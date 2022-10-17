@@ -180,7 +180,7 @@ export function ServerSnapshot(options: ServerSnapshotOptions) {
       // auto crawl internal links merge
       crawlRoutes = array_unique(
         crawlRoutes
-          .concat(Array.from(snap.links.values()))
+          .concat(Array.from(Snapshot.links.values()))
           // trim all links
           .map((path) => path.trim())
           // filter undefined and null

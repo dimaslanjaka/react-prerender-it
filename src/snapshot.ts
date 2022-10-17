@@ -32,7 +32,7 @@ save(tempPkg, JSON.stringify(pkg));
 export const pkgJson = pkg;
 
 export class Snapshot {
-  links = new Set<string>();
+  static links = new Set<string>();
   scraping = false;
   /**
    * scrape url schedule list
@@ -138,7 +138,7 @@ export class Snapshot {
       });
       // get internal links
       const urls = await captureHyperlinks({ page });
-      urls.forEach((item) => this.links.add(item));
+      //urls.forEach((item) => this.links.add(item));
       console.log(urls);
       const content = await page.content();
 
@@ -343,7 +343,7 @@ export class Snapshot {
         !str.startsWith('/undefined')
     );
     internal_links.forEach((item) => {
-      if (item.trim().length > 0) this.links.add(item);
+      if (item.trim().length > 0) Snapshot.links.add(item);
     });
     // seo external links
     /*const hostname = new URL(pkg.homepage).host;

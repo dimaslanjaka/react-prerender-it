@@ -7,7 +7,7 @@ declare type pkgType = typeof pkgTempFile & {
 };
 export declare const pkgJson: pkgType;
 export declare class Snapshot {
-    links: Set<string>;
+    static links: Set<string>;
     scraping: boolean;
     /**
      * scrape url schedule list
