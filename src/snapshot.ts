@@ -7,7 +7,12 @@ import prettier from 'prettier';
 import { launch } from 'puppeteer';
 import { dirname, join, toUnix } from 'upath';
 import prettierOptions from './.prettierrc';
-import { FixChunksOptions } from './snapshot.types';
+import {
+  fixFormFields,
+  fixInsertRule,
+  fixWebpackChunksIssue1,
+  preloadResources
+} from './snapshot.utils';
 import pkgTempFile from './temp-package.json';
 import { array_unique } from './utils/array';
 import { isDev } from './utils/env';
@@ -108,11 +113,17 @@ export class Snapshot {
         timeout: 3 * 60 * 1000
       });
       await page.waitForNetworkIdle();
+      preloadResources({ page, basePath: new URL(pkg.homepage).pathname });
+      await fixInsertRule({ page });
+      await fixFormFields({ page });
+      await fixWebpackChunksIssue1({
+        basePath: new URL(pkg.homepage).pathname,
+        page
+      });
       const content = await page.content();
       //await page.close();
 
-      result = await this.fixCRA1(content);
-      result = await this.removeUnwantedHtml(result);
+      result = await this.removeUnwantedHtml(content);
       result = await this.removeDuplicateScript(result);
       result = await this.fixInners(result);
       result = await this.fixSeoFromHtml(result);
@@ -138,88 +149,6 @@ export class Snapshot {
       this.schedule.delete(next);
       this.scrape(next);
     }
-    return result;
-  }
-
-  /**
-   * fix create-react-app v1 and v2
-   * @param html
-   * @param options
-   * @returns
-   */
-  async fixCRA1(
-    html: string | ArrayBuffer | DataView,
-    options?: FixChunksOptions
-  ) {
-    // assign default options
-    options = Object.assign(
-      { http2PushManifest: false, inlineCss: false },
-      options || {}
-    );
-    // destructure options
-    const { http2PushManifest, inlineCss } = options;
-    const dom = new JSDOM(html);
-    const window = dom.window;
-    const document = dom.window.document;
-    const basePath = new URL(pkg.homepage).pathname;
-
-    const localScripts = Array.from(document.scripts).filter(
-      (x) => x.src && x.src.startsWith(basePath)
-    );
-    // CRA v1|v2.alpha
-    const mainRegexp = /main\.[\w]{8}.js|main\.[\w]{8}\.chunk\.js/gim;
-    const mainScript = localScripts.find((x) => mainRegexp.test(x.src));
-    const firstStyle = document.querySelector('style');
-
-    if (!mainScript) {
-      return;
-    }
-
-    const chunkRegexp = /(\w+)\.[\w]{8}(\.chunk)?\.js/g;
-    const chunkScripts = localScripts.filter((x) => {
-      const matched = chunkRegexp.exec(x.src);
-      // we need to reset state of RegExp https://stackoverflow.com/a/11477448
-      chunkRegexp.lastIndex = 0;
-      return matched && matched[1] !== 'main' && matched[1] !== 'vendors';
-    });
-
-    const mainScripts = localScripts.filter((x) => {
-      const matched = chunkRegexp.exec(x.src);
-      // we need to reset state of RegExp https://stackoverflow.com/a/11477448
-      chunkRegexp.lastIndex = 0;
-      return matched && (matched[1] === 'main' || matched[1] === 'vendors');
-    });
-
-    /**
-     * Create <link />
-     * @param x
-     * @returns
-     */
-    const createLink = (x: Element) => {
-      if (http2PushManifest) return;
-      const linkTag = document.createElement('link');
-      linkTag.setAttribute('rel', 'preload');
-      linkTag.setAttribute('as', 'script');
-      linkTag.setAttribute('href', x.getAttribute('src').replace(basePath, ''));
-      if (inlineCss) {
-        firstStyle.parentNode.insertBefore(linkTag, firstStyle);
-      } else {
-        document.head.appendChild(linkTag);
-      }
-    };
-
-    mainScripts.map((x) => createLink(x));
-    for (let i = chunkScripts.length - 1; i >= 0; --i) {
-      const x = chunkScripts[i];
-      if (x.parentElement && mainScript.parentNode) {
-        x.parentElement.removeChild(x);
-        createLink(x);
-      }
-    }
-
-    const result = await this.serializeHtml(dom).finally(() => {
-      window.close();
-    });
     return result;
   }
 
