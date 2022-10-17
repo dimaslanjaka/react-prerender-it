@@ -141,6 +141,12 @@ export class Snapshot {
     return result;
   }
 
+  /**
+   * fix create-react-app v1 and v2
+   * @param html
+   * @param options
+   * @returns
+   */
   async fixCRA1(
     html: string | ArrayBuffer | DataView,
     options?: FixChunksOptions
@@ -184,6 +190,11 @@ export class Snapshot {
       return matched && (matched[1] === 'main' || matched[1] === 'vendors');
     });
 
+    /**
+     * Create <link />
+     * @param x
+     * @returns
+     */
     const createLink = (x: Element) => {
       if (http2PushManifest) return;
       const linkTag = document.createElement('link');

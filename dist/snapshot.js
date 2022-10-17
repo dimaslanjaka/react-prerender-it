@@ -226,6 +226,12 @@ var Snapshot = /** @class */ (function () {
             });
         });
     };
+    /**
+     * fix create-react-app v1 and v2
+     * @param html
+     * @param options
+     * @returns
+     */
     Snapshot.prototype.fixCRA1 = function (html, options) {
         return __awaiter(this, void 0, void 0, function () {
             var http2PushManifest, inlineCss, dom, window, document, basePath, localScripts, mainRegexp, mainScript, firstStyle, chunkRegexp, chunkScripts, mainScripts, createLink, i, x, result;
