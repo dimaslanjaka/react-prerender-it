@@ -1,6 +1,7 @@
 /// <reference types="node" />
 import Bluebird from 'bluebird';
 import { BinaryData, JSDOM } from 'jsdom';
+import { FixChunksOptions } from './snapshot.types';
 import pkgTempFile from './temp-package.json';
 declare type pkgType = typeof pkgTempFile & {
     homepage: string;
@@ -24,7 +25,7 @@ export declare class Snapshot {
      * @returns
      */
     scrape(url: string): Promise<string>;
-    fixCRA1(html: string | ArrayBuffer | DataView): Promise<string>;
+    fixCRA1(html: string | ArrayBuffer | DataView, options?: FixChunksOptions): Promise<string>;
     removeUnwantedHtml(html: string | ArrayBuffer | DataView): Promise<string>;
     removeDuplicateScript(html: string | ArrayBuffer | DataView): Promise<string>;
     fixInners(html: string | ArrayBuffer | DataView): Promise<string>;

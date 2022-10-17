@@ -226,12 +226,15 @@ var Snapshot = /** @class */ (function () {
             });
         });
     };
-    Snapshot.prototype.fixCRA1 = function (html) {
+    Snapshot.prototype.fixCRA1 = function (html, options) {
         return __awaiter(this, void 0, void 0, function () {
-            var dom, window, document, basePath, localScripts, mainRegexp, mainScript, firstStyle, chunkRegexp, chunkScripts, mainScripts, createLink, i, x, result;
+            var http2PushManifest, inlineCss, dom, window, document, basePath, localScripts, mainRegexp, mainScript, firstStyle, chunkRegexp, chunkScripts, mainScripts, createLink, i, x, result;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
+                        // assign default options
+                        options = Object.assign({ http2PushManifest: false, inlineCss: false }, options || {});
+                        http2PushManifest = options.http2PushManifest, inlineCss = options.inlineCss;
                         dom = new jsdom_1.JSDOM(html);
                         window = dom.window;
                         document = dom.window.document;
@@ -240,7 +243,6 @@ var Snapshot = /** @class */ (function () {
                         mainRegexp = /main\.[\w]{8}.js|main\.[\w]{8}\.chunk\.js/gim;
                         mainScript = localScripts.find(function (x) { return mainRegexp.test(x.src); });
                         firstStyle = document.querySelector('style');
-                        console.log({ localScripts: localScripts, mainScript: mainScript });
                         if (!mainScript) {
                             return [2 /*return*/];
                         }
@@ -258,8 +260,6 @@ var Snapshot = /** @class */ (function () {
                             return matched && (matched[1] === 'main' || matched[1] === 'vendors');
                         });
                         createLink = function (x) {
-                            var inlineCss = false;
-                            var http2PushManifest = false;
                             if (http2PushManifest)
                                 return;
                             var linkTag = document.createElement('link');

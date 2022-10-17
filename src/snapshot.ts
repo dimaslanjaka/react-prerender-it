@@ -7,6 +7,7 @@ import prettier from 'prettier';
 import { launch } from 'puppeteer';
 import { dirname, join, toUnix } from 'upath';
 import prettierOptions from './.prettierrc';
+import { FixChunksOptions } from './snapshot.types';
 import pkgTempFile from './temp-package.json';
 import { array_unique } from './utils/array';
 import { isDev } from './utils/env';
@@ -140,7 +141,17 @@ export class Snapshot {
     return result;
   }
 
-  async fixCRA1(html: string | ArrayBuffer | DataView) {
+  async fixCRA1(
+    html: string | ArrayBuffer | DataView,
+    options?: FixChunksOptions
+  ) {
+    // assign default options
+    options = Object.assign(
+      { http2PushManifest: false, inlineCss: false },
+      options || {}
+    );
+    // destructure options
+    const { http2PushManifest, inlineCss } = options;
     const dom = new JSDOM(html);
     const window = dom.window;
     const document = dom.window.document;
@@ -153,8 +164,6 @@ export class Snapshot {
     const mainRegexp = /main\.[\w]{8}.js|main\.[\w]{8}\.chunk\.js/gim;
     const mainScript = localScripts.find((x) => mainRegexp.test(x.src));
     const firstStyle = document.querySelector('style');
-
-    console.log({ localScripts, mainScript });
 
     if (!mainScript) {
       return;
@@ -176,8 +185,6 @@ export class Snapshot {
     });
 
     const createLink = (x: Element) => {
-      const inlineCss = false;
-      const http2PushManifest = false;
       if (http2PushManifest) return;
       const linkTag = document.createElement('link');
       linkTag.setAttribute('rel', 'preload');
