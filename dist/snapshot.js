@@ -139,26 +139,40 @@ var Snapshot = /** @class */ (function () {
                             browser.close();
                         });
                         // listen request
-                        page.on('request', function (request) {
-                            var url = request.url();
-                            debug('request')('request', url);
-                            var continueRequest = true;
-                            // look for tracking script
-                            if (url.match(/google-analytics\.com/gi)) {
-                                continueRequest = false;
-                            }
-                            if (!continueRequest) {
-                                request.abort();
-                            }
-                            else {
-                                request["continue"]();
-                            }
-                        });
+                        /*page.on('request', (request) => {
+                          const url = request.url();
+                          debug('request')('request', url);
+                          let continueRequest = true;
+                          // look for tracking script
+                          if (url.match(/google-analytics\.com/gi)) {
+                            continueRequest = false;
+                          }
+                          if (!continueRequest) {
+                            request.abort();
+                          } else {
+                            request.continue();
+                          }
+                        });*/
                         return [4 /*yield*/, page.goto(url, {
                                 waitUntil: 'networkidle0',
                                 timeout: 3 * 60 * 1000
                             })];
                     case 4:
+                        // listen request
+                        /*page.on('request', (request) => {
+                          const url = request.url();
+                          debug('request')('request', url);
+                          let continueRequest = true;
+                          // look for tracking script
+                          if (url.match(/google-analytics\.com/gi)) {
+                            continueRequest = false;
+                          }
+                          if (!continueRequest) {
+                            request.abort();
+                          } else {
+                            request.continue();
+                          }
+                        });*/
                         _b.sent();
                         return [4 /*yield*/, page.waitForNetworkIdle()];
                     case 5:
@@ -166,11 +180,11 @@ var Snapshot = /** @class */ (function () {
                         return [4 /*yield*/, page.content()];
                     case 6:
                         content = _b.sent();
-                        return [4 /*yield*/, this.fixCRA1(result)];
+                        return [4 /*yield*/, this.fixCRA1(content)];
                     case 7:
                         //await page.close();
                         result = _b.sent();
-                        return [4 /*yield*/, this.removeUnwantedHtml(content)];
+                        return [4 /*yield*/, this.removeUnwantedHtml(result)];
                     case 8:
                         result = _b.sent();
                         return [4 /*yield*/, this.removeDuplicateScript(result)];
@@ -223,11 +237,13 @@ var Snapshot = /** @class */ (function () {
                         document = dom.window.document;
                         basePath = new URL(pkg.homepage).pathname;
                         localScripts = Array.from(document.scripts).filter(function (x) { return x.src && x.src.startsWith(basePath); });
-                        mainRegexp = /main\.[\w]{8}.js|main\.[\w]{8}\.chunk\.js/;
+                        mainRegexp = /main\.[\w]{8}.js|main\.[\w]{8}\.chunk\.js/gim;
                         mainScript = localScripts.find(function (x) { return mainRegexp.test(x.src); });
                         firstStyle = document.querySelector('style');
-                        if (!mainScript)
+                        console.log({ localScripts: localScripts, mainScript: mainScript });
+                        if (!mainScript) {
                             return [2 /*return*/];
+                        }
                         chunkRegexp = /(\w+)\.[\w]{8}(\.chunk)?\.js/g;
                         chunkScripts = localScripts.filter(function (x) {
                             var matched = chunkRegexp.exec(x.src);
@@ -308,7 +324,9 @@ var Snapshot = /** @class */ (function () {
                             // auto generated disqus
                             'link[href="https://disqus.com/next/config.js"]',
                             // auto generated disqus
-                            'script[src*=".disqus.com/recommendations.js"]'
+                            'script[src*=".disqus.com/recommendations.js"]',
+                            // auto generated google analytics
+                            'script[src*="www.google-analytics.com/analytics.js"]'
                         ];
                         selectors
                             .map(function (selector) { return Array.from(document.querySelectorAll(selector)); })

@@ -88,7 +88,7 @@ export class Snapshot {
         browser.close();
       });
       // listen request
-      page.on('request', (request) => {
+      /*page.on('request', (request) => {
         const url = request.url();
         debug('request')('request', url);
         let continueRequest = true;
@@ -101,7 +101,7 @@ export class Snapshot {
         } else {
           request.continue();
         }
-      });
+      });*/
       await page.goto(url, {
         waitUntil: 'networkidle0',
         timeout: 3 * 60 * 1000
@@ -110,8 +110,8 @@ export class Snapshot {
       const content = await page.content();
       //await page.close();
 
-      result = await this.fixCRA1(result);
-      result = await this.removeUnwantedHtml(content);
+      result = await this.fixCRA1(content);
+      result = await this.removeUnwantedHtml(result);
       result = await this.removeDuplicateScript(result);
       result = await this.fixInners(result);
       result = await this.fixSeoFromHtml(result);
@@ -150,11 +150,15 @@ export class Snapshot {
       (x) => x.src && x.src.startsWith(basePath)
     );
     // CRA v1|v2.alpha
-    const mainRegexp = /main\.[\w]{8}.js|main\.[\w]{8}\.chunk\.js/;
+    const mainRegexp = /main\.[\w]{8}.js|main\.[\w]{8}\.chunk\.js/gim;
     const mainScript = localScripts.find((x) => mainRegexp.test(x.src));
     const firstStyle = document.querySelector('style');
 
-    if (!mainScript) return;
+    console.log({ localScripts, mainScript });
+
+    if (!mainScript) {
+      return;
+    }
 
     const chunkRegexp = /(\w+)\.[\w]{8}(\.chunk)?\.js/g;
     const chunkScripts = localScripts.filter((x) => {
@@ -230,7 +234,9 @@ export class Snapshot {
       // auto generated disqus
       'link[href="https://disqus.com/next/config.js"]',
       // auto generated disqus
-      'script[src*=".disqus.com/recommendations.js"]'
+      'script[src*=".disqus.com/recommendations.js"]',
+      // auto generated google analytics
+      'script[src*="www.google-analytics.com/analytics.js"]'
     ];
     selectors
       .map((selector) => Array.from(document.querySelectorAll(selector)))
