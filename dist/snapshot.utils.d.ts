@@ -34,6 +34,7 @@ interface ScreenshotParam {
     route: string;
 }
 export declare const saveAsPng: ({ page, filePath, route }: ScreenshotParam) => Promise<string | Buffer>;
+export declare function setid({ page }: ParamFix): Promise<void>;
 export interface FixChunksOptions {
     http2PushManifest?: boolean;
     inlineCss?: boolean;

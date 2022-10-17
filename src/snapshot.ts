@@ -125,6 +125,13 @@ export class Snapshot {
           request.continue();
         }
       });
+      // pipe console
+      page.on('console', async (msg) => {
+        const msgArgs = msg.args();
+        for (let i = 0; i < msgArgs.length; ++i) {
+          console.log(await msgArgs[i].jsonValue());
+        }
+      });
       await page.goto(url, {
         waitUntil: 'networkidle0',
         timeout: 3 * 60 * 1000
@@ -144,6 +151,7 @@ export class Snapshot {
       //result = await this.removeUnwantedHtml(result);
       result = await this.removeDuplicateScript(result);
       result = await this.fixInners(result);
+      console.log('collect internal links');
       result = await this.fixSeoFromHtml(result);
       //result = await this.setIdentifierFromHtml(result);
       //result = await this.fixCdn(result);

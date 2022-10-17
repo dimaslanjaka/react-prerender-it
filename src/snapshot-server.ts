@@ -209,9 +209,6 @@ export function ServerSnapshot(options: ServerSnapshotOptions) {
   run()
     // callback when success
     .then(doCallback)
-    .catch(console.trace)
     // callback when catch caught error
-    .finally(() => {
-      doCallback(null);
-    });
+    .catch(doCallback);
 }

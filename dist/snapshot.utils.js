@@ -36,10 +36,15 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 exports.__esModule = true;
-exports.fixParcelChunksIssue = exports.fixWebpackChunksIssue2 = exports.fixWebpackChunksIssue1 = exports.saveAsPng = exports.captureHyperlinks = exports.fixFormFields = exports.fixInsertRule = exports.removeBlobs = exports.preloadResources = void 0;
+exports.fixParcelChunksIssue = exports.fixWebpackChunksIssue2 = exports.fixWebpackChunksIssue1 = exports.setid = exports.saveAsPng = exports.captureHyperlinks = exports.fixFormFields = exports.fixInsertRule = exports.removeBlobs = exports.preloadResources = void 0;
+var debug_1 = __importDefault(require("debug"));
 var fs_1 = require("fs");
 var upath_1 = require("upath");
+var debug = function (suffix) { return (0, debug_1["default"])('prerender-it-' + suffix); };
 var defaultOptions = {
     //# stable configurations
     port: 45678,
@@ -321,6 +326,16 @@ var saveAsPng = function (_a) {
     return page.screenshot({ path: screenshotPath });
 };
 exports.saveAsPng = saveAsPng;
+// just for dump
+function setid(_a) {
+    var page = _a.page;
+    return page.evaluate(function () {
+        document.querySelectorAll('html,head,header,footer').forEach(function (el) {
+            el.setAttribute('prerender-it', 'true');
+        });
+    });
+}
+exports.setid = setid;
 var fixWebpackChunksIssue1 = function (_a) {
     var page = _a.page, basePath = _a.basePath, _b = _a.http2PushManifest, http2PushManifest = _b === void 0 ? false : _b, _c = _a.inlineCss, inlineCss = _c === void 0 ? false : _c;
     return page.evaluate(function (basePath, http2PushManifest, inlineCss) {
@@ -329,7 +344,7 @@ var fixWebpackChunksIssue1 = function (_a) {
         var mainRegexp = /main\.[\w]{8}.js|main\.[\w]{8}\.chunk\.js/;
         var mainScript = localScripts.find(function (x) { return mainRegexp.test(x.src); });
         var firstStyle = document.querySelector('style');
-        console.log({ localScripts: localScripts, mainScript: mainScript });
+        debug('debug')({ localScripts: localScripts, mainScript: mainScript });
         if (!mainScript)
             return;
         var chunkRegexp = /(\w+)\.[\w]{8}(\.chunk)?\.js/g;
@@ -351,7 +366,7 @@ var fixWebpackChunksIssue1 = function (_a) {
             var linkTag = document.createElement('link');
             linkTag.setAttribute('rel', 'preload');
             linkTag.setAttribute('as', 'script');
-            linkTag.setAttribute('href', x.src.replace(basePath, ''));
+            linkTag.setAttribute('href', x.getAttribute('src').replace(basePath, ''));
             if (inlineCss) {
                 firstStyle.parentNode.insertBefore(linkTag, firstStyle);
             }

@@ -106,6 +106,7 @@ var Snapshot = /** @class */ (function () {
     Snapshot.prototype.scrape = function (url) {
         return __awaiter(this, void 0, void 0, function () {
             var browser, result, page, content, _a, next;
+            var _this = this;
             return __generator(this, function (_b) {
                 switch (_b.label) {
                     case 0:
@@ -173,6 +174,29 @@ var Snapshot = /** @class */ (function () {
                                 request["continue"]();
                             }
                         });
+                        // pipe console
+                        page.on('console', function (msg) { return __awaiter(_this, void 0, void 0, function () {
+                            var msgArgs, i, _a, _b;
+                            return __generator(this, function (_c) {
+                                switch (_c.label) {
+                                    case 0:
+                                        msgArgs = msg.args();
+                                        i = 0;
+                                        _c.label = 1;
+                                    case 1:
+                                        if (!(i < msgArgs.length)) return [3 /*break*/, 4];
+                                        _b = (_a = console).log;
+                                        return [4 /*yield*/, msgArgs[i].jsonValue()];
+                                    case 2:
+                                        _b.apply(_a, [_c.sent()]);
+                                        _c.label = 3;
+                                    case 3:
+                                        ++i;
+                                        return [3 /*break*/, 1];
+                                    case 4: return [2 /*return*/];
+                                }
+                            });
+                        }); });
                         return [4 /*yield*/, page.goto(url, {
                                 waitUntil: 'networkidle0',
                                 timeout: 3 * 60 * 1000
@@ -207,6 +231,7 @@ var Snapshot = /** @class */ (function () {
                         return [4 /*yield*/, this.fixInners(result)];
                     case 12:
                         result = _b.sent();
+                        console.log('collect internal links');
                         return [4 /*yield*/, this.fixSeoFromHtml(result)];
                     case 13:
                         result = _b.sent();

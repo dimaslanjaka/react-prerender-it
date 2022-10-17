@@ -1,8 +1,11 @@
 // https://github.com/stereobooster/react-snap/blob/88ef70dd419158c18b9845034513dc84a3e100d9/index.js
 
+import debuglib from 'debug';
 import { existsSync, mkdirSync } from 'fs';
 import { Page } from 'puppeteer';
 import { dirname } from 'upath';
+
+const debug = (suffix: string) => debuglib('prerender-it-' + suffix);
 
 const defaultOptions = {
   //# stable configurations
@@ -265,6 +268,15 @@ export const saveAsPng = ({ page, filePath, route }: ScreenshotParam) => {
   return page.screenshot({ path: screenshotPath });
 };
 
+// just for dump
+export function setid({ page }: ParamFix) {
+  return page.evaluate(() => {
+    document.querySelectorAll('html,head,header,footer').forEach((el) => {
+      el.setAttribute('prerender-it', 'true');
+    });
+  });
+}
+
 export interface FixChunksOptions {
   http2PushManifest?: boolean;
   inlineCss?: boolean;
@@ -288,7 +300,7 @@ export const fixWebpackChunksIssue1 = ({
       const mainScript = localScripts.find((x) => mainRegexp.test(x.src));
       const firstStyle = document.querySelector('style');
 
-      console.log({ localScripts, mainScript });
+      debug('debug')({ localScripts, mainScript });
 
       if (!mainScript) return;
 
@@ -307,12 +319,15 @@ export const fixWebpackChunksIssue1 = ({
         return matched && (matched[1] === 'main' || matched[1] === 'vendors');
       });
 
-      const createLink = (x) => {
+      const createLink = (x: Element) => {
         if (http2PushManifest) return;
         const linkTag = document.createElement('link');
         linkTag.setAttribute('rel', 'preload');
         linkTag.setAttribute('as', 'script');
-        linkTag.setAttribute('href', x.src.replace(basePath, ''));
+        linkTag.setAttribute(
+          'href',
+          x.getAttribute('src').replace(basePath, '')
+        );
         if (inlineCss) {
           firstStyle.parentNode.insertBefore(linkTag, firstStyle);
         } else {

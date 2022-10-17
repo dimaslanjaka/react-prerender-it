@@ -228,8 +228,6 @@ function ServerSnapshot(options) {
     }); };
     run()
         // callback when success
-        .then(doCallback)["catch"](console.trace)["finally"](function () {
-        doCallback(null);
-    });
+        .then(doCallback)["catch"](doCallback);
 }
 exports.ServerSnapshot = ServerSnapshot;
