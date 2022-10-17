@@ -269,9 +269,10 @@ var fixFormFields = function (_a) {
 exports.fixFormFields = fixFormFields;
 var captureHyperlinks = function (_a) {
     var page = _a.page;
-    var links = new Set();
     return new Promise(function (resolve) {
-        page.evaluate(function () {
+        var collectedLinks = new Set();
+        page
+            .evaluate(function () {
             // get internal links
             var anchors = Array.from(document.querySelectorAll('a'));
             var internal_links = (0, array_1.array_unique)(anchors
@@ -292,9 +293,11 @@ var captureHyperlinks = function (_a) {
             });
             internal_links.forEach(function (item) {
                 if (item.trim().length > 0)
-                    links.add(item);
+                    collectedLinks.add(item);
             });
-            resolve(Array.from(links.values()));
+        })
+            .then(function () {
+            resolve(Array.from(collectedLinks.values()));
         });
     });
 };

@@ -220,37 +220,40 @@ export const fixFormFields = ({ page }: ParamFix) => {
 };
 
 export const captureHyperlinks = ({ page }: ParamFix): Promise<string[]> => {
-  const links = new Set<string>();
   return new Promise((resolve) => {
-    page.evaluate(() => {
-      // get internal links
-      const anchors = Array.from(document.querySelectorAll('a'));
-      const internal_links = array_unique(
-        anchors
-          .filter(
-            (a) =>
-              a.href.startsWith('/') &&
-              !/.(jpeg|jpg|gif|svg|ico|png)$/i.test(a.href)
-          )
-          .map((a) => a.href)
-          .filter(
-            (href) =>
-              typeof href === 'string' &&
-              href.startsWith('/') &&
-              !/.(jpeg|jpg|gif|svg|ico|png)$/i.test(href) &&
-              href.length > 0
-          )
-      ).filter(
-        (str) =>
-          typeof str === 'string' &&
-          str.length > 0 &&
-          !str.startsWith('/undefined')
-      );
-      internal_links.forEach((item) => {
-        if (item.trim().length > 0) links.add(item);
+    const collectedLinks = new Set<string>();
+    page
+      .evaluate(() => {
+        // get internal links
+        const anchors = Array.from(document.querySelectorAll('a'));
+        const internal_links = array_unique(
+          anchors
+            .filter(
+              (a) =>
+                a.href.startsWith('/') &&
+                !/.(jpeg|jpg|gif|svg|ico|png)$/i.test(a.href)
+            )
+            .map((a) => a.href)
+            .filter(
+              (href) =>
+                typeof href === 'string' &&
+                href.startsWith('/') &&
+                !/.(jpeg|jpg|gif|svg|ico|png)$/i.test(href) &&
+                href.length > 0
+            )
+        ).filter(
+          (str) =>
+            typeof str === 'string' &&
+            str.length > 0 &&
+            !str.startsWith('/undefined')
+        );
+        internal_links.forEach((item) => {
+          if (item.trim().length > 0) collectedLinks.add(item);
+        });
+      })
+      .then(() => {
+        resolve(Array.from(collectedLinks.values()));
       });
-      resolve(Array.from(links.values()));
-    });
   });
 };
 
