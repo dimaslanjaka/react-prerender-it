@@ -34,8 +34,9 @@ ServerSnapshot({
 });
 ```
 
-full example at https://github.com/dimaslanjaka/chimeraland
-- https://github.com/dimaslanjaka/chimeraland/blob/master/gulp.snapshot-routes.ts
+## Examples
+- https://github.com/dimaslanjaka/chimeraland/tree/62d0b83c15f68d2d59ac5fea3226c6abe2d53d62
+- https://github.com/dimaslanjaka/chimeraland/blob/62d0b83c15f68d2d59ac5fea3226c6abe2d53d62/gulp.snapshot-routes.ts
 
 ## Develop
 ```bash
